@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  passwordHash         String
+  name                 String
+  avatar               String?           @default("")
+  planTier             String            @default("Pro Student")
+  totalHoursStudied    Float             @default(0.0)
+  totalCertifications  Int               @default(1)
+  weeklyTargetHours    Int               @default(15)
+  preferences          Json?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  courses              Course[]
+  studySessions        StudySession[]
+  researchSummaries    ResearchSummary[]
+}
+
+model Course {
+  id                      String            @id @default(uuid())
+  userId                  String
+  title                   String
+  code                    String
+  category                String
+  examDate                String
+  targetHoursPerWeek      Int               @default(15)
+  studiedHoursThisWeek    Float             @default(0.0)
+  streakDays              Int               @default(1)
+  completedSessionsToday  Int               @default(0)
+  weeklyActivity          Json?
+  topicMastery            Json?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  user                    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phases                  Phase[]
+  tasks                   Task[]
+  studySessions           StudySession[]
+  researchSummaries       ResearchSummary[]
+}
+
+model Phase {
+  id                String    @id @default(uuid())
+  courseId          String
+  phaseNumber       Int
+  title             String
+  description       String
+  status            String    @default("locked") // completed, in_progress, locked
+  dateRange         String
+  progressPercent   Int       @default(0)
+  topicsCovered     String[]  @default([])
+  nextVideo         Json?
+  upcomingLab       Json?
+  subtopics         Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  course            Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id                String    @id @default(uuid())
+  courseId          String
+  title             String
+  type              String    // video, lab, reading, quiz, practice
+  durationMinutes   Int       @default(30)
+  status            String    @default("current") // completed, current, locked
+  progressPercent   Int       @default(0)
+  phaseId           String?
+  subtopicId        String?
+  completedAt       DateTime?
+  date              String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  course            Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model StudySession {
+  id                String    @id @default(uuid())
+  userId            String
+  courseId          String?
+  taskTitle         String
+  taskType          String
+  durationMinutes   Int
+  completedAt       DateTime  @default(now())
+  notes             String?
+  createdAt         DateTime  @default(now())
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course            Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
+
+model ResearchSummary {
+  id                        String    @id @default(uuid())
+  userId                    String
+  courseId                  String?
+  title                     String
+  originalText              String    @db.Text
+  fileName                  String?
+  fileType                  String?   @default("text")
+  overview                  String    @db.Text
+  keyConcepts               Json      // Array of { concept, definition }
+  examHighYield             String[]  @default([])
+  wordCount                 Int       @default(0)
+  estimatedStudyTimeMinutes Int       @default(15)
+  tags                      String[]  @default([])
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  user                      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course                    Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
