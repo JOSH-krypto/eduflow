@@ -66,10 +66,18 @@ class ApiService {
         email: data.email,
         avatar: '',
         planTier: 'Pro Student',
-        activeCourseId: 'aws-saa-c03',
+        activeCourseId: '',
         totalHoursStudied: 0,
-        totalCertifications: 1,
-        weeklyTargetHours: 20,
+        totalCertifications: 0,
+        weeklyTargetHours: 15,
+        preferences: {
+          preferredStudyDays: [1, 2, 3, 4, 5],
+          preferredStudyTime: 'morning',
+          streakReminders: true,
+          examCountdownAlerts: true,
+          newResourceAlerts: true,
+          accentColor: '#7C3AED',
+        },
       };
       saveUserProfile(profile);
       return { user: profile };
@@ -242,27 +250,29 @@ class ApiService {
       return res.summary;
     } catch (err: any) {
       console.warn('Backend AI proxy error or offline, generating structured summary:', err);
+      const lines = materialText.split('\n').map((l) => l.trim()).filter(Boolean);
       const words = materialText.split(/\s+/).filter(Boolean);
+      const firstLine = lines[0] ? lines[0].replace(/^#+\s*/, '').substring(0, 50) : 'Study Summary';
+
       return {
         id: `summary-${Date.now()}`,
-        title: title || 'Study Summary',
+        title: title || firstLine || 'Study Material Breakdown',
         originalText: materialText,
-        overview: `Executive summary covering ${words.length} words of study material. High-yield architectural principles and key test scenarios for optimal exam readiness.`,
-        keyConcepts: [
-          { concept: 'Core Architecture Pattern', definition: 'Follows standardized principles of high availability, security isolation, and fault tolerance.' },
-          { concept: 'Resource Scaling & Resilience', definition: 'Automated elastic scaling based on workload thresholds with cross-zone disaster recovery.' },
-          { concept: 'Governance & Access Boundaries', definition: 'Enforcing least-privilege identity federation, encryption-at-rest, and transit protections.' }
-        ],
+        overview: `Executive summary covering ${words.length} words of study material. Synthesizes key concepts and exam preparation objectives.`,
+        keyConcepts: lines.slice(0, 4).map((line, idx) => ({
+          concept: `Key Concept ${idx + 1}`,
+          definition: line.length > 120 ? line.substring(0, 120) + '...' : line,
+        })),
         examHighYield: [
-          'High-probability scenario: Multi-region latency trade-offs vs synchronous multi-AZ standby replication.',
-          'Always identify single points of failure in questions mentioning 99.99% availability SLAs.',
-          'Review service limits, default timeout values, and explicit deny policy evaluation hierarchies.'
+          'Review foundational definitions and terminology in this topic.',
+          'Focus on edge cases, limits, and high-frequency problem scenarios.',
+          'Practice explaining core concepts in your own words before your exam date.'
         ],
         wordCount: words.length,
         estimatedStudyTimeMinutes: Math.max(10, Math.round(words.length / 100) * 5),
         createdAt: new Date().toISOString(),
         courseId,
-        tags: ['StudyNotes', 'Extracted', 'Cloud'],
+        tags: ['StudyNotes', 'ExamPrep'],
       };
     }
   }

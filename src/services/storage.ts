@@ -8,7 +8,6 @@ import {
   AgendaTask,
   SubTopic 
 } from '../types/eduflow';
-import { seedCourses, initialUserProfile, initialNotifications } from '../data/seedData';
 
 const STORAGE_KEYS = {
   COURSES: 'eduflow_courses_data',
@@ -19,17 +18,35 @@ const STORAGE_KEYS = {
   RESEARCH_SUMMARIES: 'eduflow_research_summaries',
 };
 
+export const defaultUserProfile: UserProfile = {
+  name: 'Student',
+  avatar: '',
+  planTier: 'Pro Student',
+  email: '',
+  activeCourseId: '',
+  totalHoursStudied: 0,
+  totalCertifications: 0,
+  weeklyTargetHours: 15,
+  preferences: {
+    preferredStudyDays: [1, 2, 3, 4, 5],
+    preferredStudyTime: 'morning',
+    streakReminders: true,
+    examCountdownAlerts: true,
+    newResourceAlerts: true,
+    accentColor: '#7C3AED',
+  },
+};
+
 // Course Data
 export function loadCourses(): Course[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.COURSES);
     if (!data) {
-      saveCourses(seedCourses);
-      return seedCourses;
+      return [];
     }
     return JSON.parse(data);
   } catch {
-    return seedCourses;
+    return [];
   }
 }
 
@@ -43,7 +60,7 @@ export function saveCourses(courses: Course[]): void {
 
 // Active Course ID
 export function getActiveCourseId(): string {
-  return localStorage.getItem(STORAGE_KEYS.ACTIVE_COURSE_ID) || 'aws-saa-c03';
+  return localStorage.getItem(STORAGE_KEYS.ACTIVE_COURSE_ID) || '';
 }
 
 export function setActiveCourseId(id: string): void {
@@ -55,12 +72,11 @@ export function loadUserProfile(): UserProfile {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
     if (!data) {
-      saveUserProfile(initialUserProfile);
-      return initialUserProfile;
+      return defaultUserProfile;
     }
     return JSON.parse(data);
   } catch {
-    return initialUserProfile;
+    return defaultUserProfile;
   }
 }
 
@@ -77,12 +93,11 @@ export function loadNotifications(): NotificationItem[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
     if (!data) {
-      saveNotifications(initialNotifications);
-      return initialNotifications;
+      return [];
     }
     return JSON.parse(data);
   } catch {
-    return initialNotifications;
+    return [];
   }
 }
 
@@ -112,42 +127,15 @@ export function saveSessionLogs(logs: StudySessionLog[]): void {
   }
 }
 
-const defaultSeedSummaries: ResearchSummary[] = [
-  {
-    id: 'sum-seed-1',
-    title: 'VPC Peering vs Transit Gateway Hub-and-Spoke',
-    originalText: 'VPC peering connection is a networking connection between two VPCs that enables you to route traffic between them using private IPv4 or IPv6 addresses. No transitive peering. Transit Gateway acts as a cloud router connecting VPCs and on-premises networks.',
-    fileName: 'vpc-peering-notes.md',
-    fileType: 'markdown',
-    overview: 'Compares point-to-point VPC peering topologies with scalable hub-and-spoke AWS Transit Gateway architectures, highlighting transitive routing limitations and bandwidth limits.',
-    keyConcepts: [
-      { concept: 'VPC Peering', definition: 'Non-transitive point-to-point connection between 2 VPCs with zero bandwidth bottleneck and lowest cost.' },
-      { concept: 'Transit Gateway', definition: 'Regional hub router managing thousands of VPCs and VPN/Direct Connect connections with centralized routing policies.' },
-      { concept: 'Transitive Routing', definition: 'Traffic cannot pass through a peered VPC to reach another VPC; requires Transit Gateway to route transitively.' }
-    ],
-    examHighYield: [
-      'VPC Peering has NO bandwidth limit and NO hourly gateway cost; use for simple 2-VPC private communication.',
-      'Transit Gateway supports multicast and simplifies network architecture when connecting > 5 VPCs.',
-      'Exam trap: VPC A <-> VPC B <-> VPC C does NOT allow VPC A to talk to VPC C without direct peering or Transit Gateway.'
-    ],
-    createdAt: '2026-09-08T14:30:00Z',
-    wordCount: 320,
-    estimatedStudyTimeMinutes: 20,
-    courseId: 'aws-saa-c03',
-    tags: ['VPC', 'Networking', 'TransitGateway', 'SAA-C03']
-  }
-];
-
 export function loadResearchSummaries(): ResearchSummary[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.RESEARCH_SUMMARIES);
     if (!data) {
-      saveResearchSummaries(defaultSeedSummaries);
-      return defaultSeedSummaries;
+      return [];
     }
     return JSON.parse(data);
   } catch {
-    return defaultSeedSummaries;
+    return [];
   }
 }
 

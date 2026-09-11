@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Camera,
   Mail,
@@ -20,6 +20,7 @@ import {
 import { UserProfile, UserPreferences } from '../../types/eduflow';
 import { InitialsAvatar } from '../common/InitialsAvatar';
 import { api } from '../../services/api';
+import { ACCENT_PALETTE, applyTheme, findAccentOption, DEFAULT_ACCENT_HEX } from '../../utils/theme';
 
 interface ProfileTabProps {
   profile: UserProfile;
@@ -34,8 +35,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   onSignOut,
   isBackendConnected = false,
 }) => {
-  const [name, setName] = useState(profile.name || 'Alex Chen');
-  const [email, setEmail] = useState(profile.email || 'alex.chen@university.edu');
+  const [name, setName] = useState(profile.name || 'Student');
+  const [email, setEmail] = useState(profile.email || '');
   const [avatar, setAvatar] = useState(profile.avatar || '');
   const [weeklyTargetHours, setWeeklyTargetHours] = useState(profile.weeklyTargetHours || 15);
   const [isUploading, setIsUploading] = useState(false);
@@ -49,11 +50,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
       streakReminders: true,
       examCountdownAlerts: true,
       newResourceAlerts: true,
-      accentColor: '#8B5CF6',
+      accentColor: DEFAULT_ACCENT_HEX,
     }
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync theme when preferences change
+  useEffect(() => {
+    if (preferences.accentColor) {
+      applyTheme(preferences.accentColor);
+    }
+  }, [preferences.accentColor]);
 
   const daysOfWeek = [
     { label: 'M', day: 1, full: 'Mon' },
@@ -72,18 +80,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     { id: 'night', label: 'Night', sub: '9pm - 1am', icon: Moon },
   ];
 
-  const accentColors = [
-    { name: 'Lavender Violet', hex: '#8B5CF6', bg: 'bg-violet-500' },
-    { name: 'Ocean Teal', hex: '#0D9488', bg: 'bg-teal-600' },
-    { name: 'Emerald Sage', hex: '#10B981', bg: 'bg-emerald-500' },
-    { name: 'Warm Amber', hex: '#F59E0B', bg: 'bg-amber-500' },
-    { name: 'Soft Rose', hex: '#F43F5E', bg: 'bg-rose-500' },
-  ];
-
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      setUploadError('Please select a valid image file (JPEG, PNG, WebP, or GIF)');
+      return;
+    }
+
+    // Validate file size (< 4MB)
     if (file.size > 4 * 1024 * 1024) {
       setUploadError('Image size must be under 4MB');
       return;
@@ -118,6 +126,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     setPreferences({ ...preferences, preferredStudyDays: updatedDays });
   };
 
+  const handleSelectAccent = (hex: string) => {
+    const updatedPrefs = { ...preferences, accentColor: hex };
+    setPreferences(updatedPrefs);
+    applyTheme(hex);
+    // Persist immediately to profile state & backend
+    const updatedProfile: UserProfile = {
+      ...profile,
+      name,
+      email,
+      avatar,
+      weeklyTargetHours,
+      preferences: updatedPrefs,
+    };
+    onUpdateProfile(updatedProfile);
+    api.updateProfile(updatedProfile).catch(() => {});
+  };
+
   const handleSave = () => {
     const updated: UserProfile = {
       ...profile,
@@ -128,9 +153,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
       preferences,
     };
     onUpdateProfile(updated);
+    api.updateProfile(updated).catch(() => {});
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2500);
   };
+
+  const currentAccentHex = preferences.accentColor || DEFAULT_ACCENT_HEX;
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 pb-16 animate-fade-in font-sans">
@@ -144,8 +172,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             Manage your schedule, study targets, and sync settings
           </p>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-100/80 rounded-full text-xs font-semibold text-violet-700">
-          <Cloud className={`w-4 h-4 ${isBackendConnected ? 'text-emerald-500' : 'text-violet-500'}`} />
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-theme-light border border-theme-border rounded-full text-xs font-semibold text-theme-dark">
+          <Cloud className={`w-4 h-4 ${isBackendConnected ? 'text-emerald-500' : 'text-theme-accent'}`} />
           <span>{isBackendConnected ? 'Cloud Synced' : 'Offline Ready'}</span>
         </div>
       </div>
@@ -169,7 +197,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
                   aria-label="Upload profile photo"
-                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-violet-600 hover:bg-violet-700 text-white rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-theme-accent hover:opacity-90 text-white rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer"
                 >
                   <Camera className="w-4 h-4" />
                 </button>
@@ -177,21 +205,21 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   type="file"
                   ref={fileInputRef}
                   onChange={handlePhotoSelect}
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
                   className="hidden"
                 />
               </div>
 
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-800 font-heading">{name}</h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-700">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-800 font-heading">{name || 'Student'}</h2>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-theme-light text-theme-dark">
                     {profile.planTier || 'Pro Student'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1 flex items-center justify-center sm:justify-start gap-1">
                   <Mail className="w-3.5 h-3.5" />
-                  {email}
+                  {email || 'No email set'}
                 </p>
 
                 {uploadError && (
@@ -203,15 +231,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
                 <div className="mt-3 flex items-center justify-center sm:justify-start gap-4 text-slate-600 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-violet-500" />
+                    <Clock className="w-4 h-4 text-theme-accent" />
                     <span>
-                      <strong className="text-slate-800 font-semibold">{profile.totalHoursStudied || 48.5}h</strong> studied
+                      <strong className="text-slate-800 font-semibold">{profile.totalHoursStudied || 0}h</strong> studied
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Award className="w-4 h-4 text-amber-500" />
                     <span>
-                      <strong className="text-slate-800 font-semibold">{profile.totalCertifications || 2}</strong> tracks
+                      <strong className="text-slate-800 font-semibold">{profile.totalCertifications || 0}</strong> tracks
                     </span>
                   </div>
                 </div>
@@ -222,7 +250,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           {/* Account Details Form */}
           <div className="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-card space-y-4">
             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-heading">
-              <ShieldCheck className="w-4 h-4 text-violet-500" />
+              <ShieldCheck className="w-4 h-4 text-theme-accent" />
               Account Details
             </h3>
 
@@ -233,7 +261,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 transition"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition"
                   placeholder="Your full name"
                 />
               </div>
@@ -244,31 +272,27 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400 transition"
-                  placeholder="your.email@university.edu"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition"
+                  placeholder="your.email@example.com"
                 />
               </div>
             </div>
           </div>
 
-          {/* Study Routine & Target */}
-          <div className="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-card space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-heading">
-                <Clock className="w-4 h-4 text-teal-600" />
-                Study Schedule & Target
-              </h3>
-              <span className="text-xs font-bold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full font-mono">
-                {weeklyTargetHours} hrs / week
-              </span>
-            </div>
+          {/* Study Routine & Weekly Target */}
+          <div className="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-card space-y-5">
+            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-heading">
+              <Clock className="w-4 h-4 text-theme-accent" />
+              Weekly Target & Days
+            </h3>
 
-            {/* Weekly Hours Slider */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-slate-500 font-medium">
-                <span>5 hrs</span>
-                <span>20 hrs</span>
-                <span>40 hrs</span>
+            {/* Slider */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-slate-600 font-medium">Weekly Target Hours</span>
+                <span className="text-xs font-bold text-theme-dark bg-theme-light px-2.5 py-1 rounded-full font-mono">
+                  {weeklyTargetHours} hrs / week
+                </span>
               </div>
               <input
                 type="range"
@@ -277,77 +301,64 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 step="1"
                 value={weeklyTargetHours}
                 onChange={(e) => setWeeklyTargetHours(Number(e.target.value))}
-                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-violet-600"
+                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-purple-600"
               />
-              <div className="flex gap-2 pt-1">
-                {[10, 15, 20, 25].map((target) => (
-                  <button
-                    key={target}
-                    type="button"
-                    onClick={() => setWeeklyTargetHours(target)}
-                    className={`flex-1 py-1.5 text-[11px] font-semibold rounded-xl border transition cursor-pointer ${
-                      weeklyTargetHours === target
-                        ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-                        : 'bg-slate-50 text-slate-600 border-slate-200/70 hover:bg-slate-100'
-                    }`}
-                  >
-                    {target}h
-                  </button>
-                ))}
+              <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+                <span>5 hrs (Casual)</span>
+                <span>20 hrs (Recommended)</span>
+                <span>40 hrs (Intensive)</span>
               </div>
             </div>
 
-            {/* Preferred Study Days */}
-            <div className="pt-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-2">Preferred Study Days</label>
-              <div className="flex justify-between gap-1.5">
-                {daysOfWeek.map(({ label, day, full }) => {
-                  const isSelected = preferences.preferredStudyDays?.includes(day);
+            {/* Days of week selector */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-2">Active Study Days</label>
+              <div className="flex items-center justify-between gap-1.5">
+                {daysOfWeek.map((d) => {
+                  const isSelected = preferences.preferredStudyDays?.includes(d.day);
                   return (
                     <button
-                      key={day}
+                      key={d.day}
                       type="button"
-                      onClick={() => toggleDay(day)}
-                      title={full}
-                      className={`flex-1 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      onClick={() => toggleDay(d.day)}
+                      aria-label={`${d.full} study day`}
+                      className={`w-10 h-10 rounded-2xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
                         isSelected
-                          ? 'bg-violet-600 text-white shadow-sm'
-                          : 'bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100'
+                          ? 'bg-theme-accent text-white shadow-sm'
+                          : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
                       }`}
                     >
-                      {label}
+                      {d.label}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Preferred Study Time */}
-            <div className="pt-2">
-              <label className="block text-xs font-semibold text-slate-600 mb-2">Peak Productivity Time</label>
-              <div className="grid grid-cols-2 gap-2.5">
-                {timeSlots.map(({ id, label, sub, icon: Icon }) => {
-                  const isSelected = preferences.preferredStudyTime === id;
+            {/* Preferred Study Time Window */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-2">Preferred Study Window</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {timeSlots.map((slot) => {
+                  const Icon = slot.icon;
+                  const isSelected = preferences.preferredStudyTime === slot.id;
                   return (
                     <button
-                      key={id}
+                      key={slot.id}
                       type="button"
                       onClick={() =>
-                        setPreferences({
-                          ...preferences,
-                          preferredStudyTime: id as any,
-                        })
+                        setPreferences({ ...preferences, preferredStudyTime: slot.id as any })
                       }
-                      className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                      className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-violet-50/70 border-violet-300 text-violet-900 shadow-sm'
-                          : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100'
+                          ? 'bg-theme-light border-theme-border text-theme-dark shadow-sm'
+                          : 'bg-slate-50/60 border-slate-200/70 text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 mt-0.5 ${isSelected ? 'text-violet-600' : 'text-slate-400'}`} />
+                      <Icon className={`w-4 h-4 mb-2 ${isSelected ? 'text-theme-accent' : 'text-slate-400'}`} />
                       <div>
-                        <div className="text-xs font-bold font-heading">{label}</div>
-                        <div className="text-[10px] text-slate-400">{sub}</div>
+                        <div className="text-xs font-bold font-heading">{slot.label}</div>
+                        <div className="text-[10px] text-slate-400">{slot.sub}</div>
                       </div>
                     </button>
                   );
@@ -357,20 +368,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           </div>
         </div>
 
-        {/* Right Column (lg:col-span-6): Smart Alerts, Themes, Save Button */}
+        {/* Right Column (lg:col-span-6): Notification Toggles, Accent Theme, Save CTA */}
         <div className="lg:col-span-6 space-y-6">
-          {/* Notification Preferences */}
+          {/* Notifications & Reminders */}
           <div className="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-card space-y-4">
             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-heading">
-              <Bell className="w-4 h-4 text-amber-500" />
-              Smart Alerts & Reminders
+              <Bell className="w-4 h-4 text-theme-accent" />
+              Alerts & Notifications
             </h3>
 
-            <div className="space-y-3">
-              <label className="flex items-center justify-between cursor-pointer">
+            <div className="space-y-3 divide-y divide-slate-100">
+              <label className="flex items-center justify-between pt-2 cursor-pointer">
                 <div>
-                  <div className="text-xs font-semibold text-slate-700 font-heading">Daily Streak Reminders</div>
-                  <div className="text-[11px] text-slate-400">Gentle nudge before your study streak expires</div>
+                  <div className="text-xs font-bold text-slate-800">Streak Reminder</div>
+                  <div className="text-[11px] text-slate-400">Daily alert to keep your study streak active</div>
                 </div>
                 <input
                   type="checkbox"
@@ -378,16 +389,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   onChange={(e) =>
                     setPreferences({ ...preferences, streakReminders: e.target.checked })
                   }
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-400"
+                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-400"
                 />
               </label>
 
-              <div className="h-px bg-slate-100" />
-
-              <label className="flex items-center justify-between cursor-pointer">
+              <label className="flex items-center justify-between pt-3 cursor-pointer">
                 <div>
-                  <div className="text-xs font-semibold text-slate-700 font-heading">Exam Milestone Alerts</div>
-                  <div className="text-[11px] text-slate-400">Phase deadline countdown notifications</div>
+                  <div className="text-xs font-bold text-slate-800">Exam Countdown Alerts</div>
+                  <div className="text-[11px] text-slate-400">Milestone updates at 30, 14, 7, and 1 day remaining</div>
                 </div>
                 <input
                   type="checkbox"
@@ -395,16 +404,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   onChange={(e) =>
                     setPreferences({ ...preferences, examCountdownAlerts: e.target.checked })
                   }
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-400"
+                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-400"
                 />
               </label>
 
-              <div className="h-px bg-slate-100" />
-
-              <label className="flex items-center justify-between cursor-pointer">
+              <label className="flex items-center justify-between pt-3 cursor-pointer">
                 <div>
-                  <div className="text-xs font-semibold text-slate-700 font-heading">AI Summarizer Recommendations</div>
-                  <div className="text-[11px] text-slate-400">High-yield revision flashcards & summaries</div>
+                  <div className="text-xs font-bold text-slate-800">New Resource Alerts</div>
+                  <div className="text-[11px] text-slate-400">Get notified when new cheat sheets or labs are added</div>
                 </div>
                 <input
                   type="checkbox"
@@ -412,13 +419,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   onChange={(e) =>
                     setPreferences({ ...preferences, newResourceAlerts: e.target.checked })
                   }
-                  className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-400"
+                  className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-400"
                 />
               </label>
             </div>
           </div>
 
-          {/* App Accent Color */}
+          {/* Theme Accent Tint (WCAG AA Calibrated & Fully Accessible) */}
           <div className="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-card space-y-3">
             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-heading">
               <Palette className="w-4 h-4 text-rose-500" />
@@ -426,20 +433,35 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             </h3>
             <p className="text-xs text-slate-500">Pick a subtle accent tint for badges and highlights</p>
 
-            <div className="flex items-center gap-3 pt-1">
-              {accentColors.map((color) => {
-                const isSelected = preferences.accentColor === color.hex;
+            <div 
+              role="radiogroup" 
+              aria-label="Theme Accent Tint" 
+              className="flex items-center gap-3 pt-1"
+            >
+              {ACCENT_PALETTE.map((color) => {
+                const isSelected = findAccentOption(currentAccentHex).id === color.id;
                 return (
                   <button
-                    key={color.hex}
+                    key={color.id}
                     type="button"
-                    onClick={() => setPreferences({ ...preferences, accentColor: color.hex })}
-                    title={color.name}
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${color.bg} ${
-                      isSelected ? 'ring-4 ring-slate-200 scale-105 shadow-md' : 'opacity-80 hover:opacity-100'
-                    }`}
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    aria-label={`${color.name} accent tint`}
+                    onClick={() => handleSelectAccent(color.hex)}
+                    onKeyDown={(e) => {
+                      if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSelectAccent(color.hex);
+                      }
+                    }}
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all cursor-pointer ${color.twClass} ${
+                      isSelected 
+                        ? 'ring-4 ring-offset-2 ring-slate-800/40 scale-105 shadow-md' 
+                        : 'opacity-80 hover:opacity-100 hover:scale-105'
+                    } focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-slate-700`}
                   >
-                    {isSelected && <Check className="w-4 h-4 text-white" />}
+                    {isSelected && <Check className="w-4 h-4 text-white stroke-[3]" />}
                   </button>
                 );
               })}
@@ -450,7 +472,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           <div>
             <button
               onClick={handleSave}
-              className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-bold rounded-2xl shadow-card transition flex items-center justify-center gap-2 text-sm font-heading cursor-pointer"
+              className="w-full py-3.5 bg-theme-accent hover:opacity-90 active:scale-[0.99] text-white font-bold rounded-2xl shadow-card transition flex items-center justify-center gap-2 text-sm font-heading cursor-pointer"
             >
               {saveSuccess ? (
                 <>
@@ -483,3 +505,5 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     </div>
   );
 };
+
+export default ProfileTab;
