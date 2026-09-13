@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+import { validateBody, createSessionSchema } from '../middleware/validate.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -21,18 +22,24 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // POST /api/sessions
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/', authMiddleware, validateBody(createSessionSchema), async (req: AuthRequest, res) => {
   try {
     const { courseId, taskTitle, taskType, durationMinutes, notes } = req.body;
 
-    if (!taskTitle || !durationMinutes) {
-      return res.status(400).json({ message: 'taskTitle and durationMinutes are required.' });
+    let validCourseId: string | null = null;
+    if (courseId) {
+      const course = await prisma.course.findFirst({
+        where: { id: courseId, userId: req.userId },
+      });
+      if (course) {
+        validCourseId = course.id;
+      }
     }
 
     const session = await prisma.studySession.create({
       data: {
         userId: req.userId!,
-        courseId: courseId || null,
+        courseId: validCourseId,
         taskTitle,
         taskType: taskType || 'study',
         durationMinutes: Number(durationMinutes),
@@ -49,9 +56,9 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
       },
     });
 
-    if (courseId) {
+    if (validCourseId) {
       await prisma.course.update({
-        where: { id: courseId },
+        where: { id: validCourseId },
         data: {
           studiedHoursThisWeek: { increment: Math.round(hours * 10) / 10 },
           completedSessionsToday: { increment: 1 },

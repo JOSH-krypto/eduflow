@@ -1,17 +1,23 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+import { validateBody, createTaskSchema, updateTaskSchema } from '../middleware/validate.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // POST /api/tasks
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/', authMiddleware, validateBody(createTaskSchema), async (req: AuthRequest, res) => {
   try {
     const { courseId, title, type, durationMinutes, phaseId, subtopicId } = req.body;
 
-    if (!courseId || !title) {
-      return res.status(400).json({ message: 'courseId and title are required.' });
+    // Verify course belongs to authenticated user
+    const course = await prisma.course.findFirst({
+      where: { id: courseId, userId: req.userId },
+    });
+
+    if (!course) {
+      return res.status(403).json({ message: 'Course not found or unauthorized.' });
     }
 
     const task = await prisma.task.create({
@@ -35,10 +41,20 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // PATCH /api/tasks/:id
-router.patch('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.patch('/:id', authMiddleware, validateBody(updateTaskSchema), async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { status, progressPercent, completedAt } = req.body;
+
+    // Verify task exists and belongs to user's course
+    const existing = await prisma.task.findUnique({
+      where: { id },
+      include: { course: true },
+    });
+
+    if (!existing || existing.course.userId !== req.userId) {
+      return res.status(403).json({ message: 'Task not found or unauthorized.' });
+    }
 
     const task = await prisma.task.update({
       where: { id },
@@ -60,6 +76,16 @@ router.patch('/:id', authMiddleware, async (req: AuthRequest, res) => {
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+
+    const existing = await prisma.task.findUnique({
+      where: { id },
+      include: { course: true },
+    });
+
+    if (!existing || existing.course.userId !== req.userId) {
+      return res.status(403).json({ message: 'Task not found or unauthorized.' });
+    }
+
     await prisma.task.delete({ where: { id } });
     return res.json({ message: 'Task deleted.' });
   } catch (err: any) {

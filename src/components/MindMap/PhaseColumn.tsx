@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExamPlan } from '../../types/plan';
-import { formatDate } from '../../data/sampleExams';
+import { formatDate } from '../../utils/dateUtils';
 import { Sparkles, Calendar, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 interface PhaseColumnProps {

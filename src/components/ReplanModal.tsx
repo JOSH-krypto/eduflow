@@ -1,7 +1,7 @@
 import React from 'react';
 import { ExamPlan } from '../types/plan';
 import { Sparkles, X, CheckCircle2, Circle, AlertCircle, Calendar } from 'lucide-react';
-import { formatDate } from '../data/sampleExams';
+import { formatDate } from '../utils/dateUtils';
 
 interface ReplanModalProps {
   isOpen: boolean;

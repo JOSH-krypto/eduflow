@@ -23,41 +23,56 @@ router.post('/summarize', aiLimiter, optionalAuthMiddleware, async (req: AuthReq
       return res.status(400).json({ message: 'materialText string is required for summarization.' });
     }
 
+    if (materialText.length > 50000) {
+      return res.status(400).json({ message: 'Study material exceeds the maximum allowed length of 50,000 characters.' });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
-    const wordCount = materialText.split(/\s+/).filter(Boolean).length;
+    const words = materialText.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
 
     if (!apiKey) {
-      console.warn('GEMINI_API_KEY not configured on backend. Returning structured fallback breakdown.');
-      // Return structured response if no key configured
+      // Heuristic extraction directly from user's text
+      const sentences = materialText.match(/[^.!?]+[.!?]+/g) || [materialText];
+      const lines = materialText.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      const concepts: { concept: string; definition: string }[] = [];
+      const highYield: string[] = [];
+
+      for (const line of lines) {
+        if (line.includes(':') && line.length > 15 && line.length < 250) {
+          const parts = line.split(':');
+          const concept = parts[0].replace(/^[-*•#\d.]+\s*/, '').trim();
+          const definition = parts.slice(1).join(':').trim();
+          if (concept.length < 35 && definition.length > 10 && concepts.length < 6) {
+            concepts.push({ concept, definition });
+          }
+        }
+      }
+
+      if (concepts.length === 0) {
+        sentences.slice(0, 3).forEach((s, idx) => {
+          concepts.push({ concept: `Key Concept ${idx + 1}`, definition: s.trim() });
+        });
+      }
+
+      sentences.slice(3, 6).forEach(s => highYield.push(s.trim()));
+      if (highYield.length === 0) {
+        highYield.push(`Review core definitions and test items for ${courseTitle || 'this topic'}.`);
+      }
+
       return res.json({
         summary: {
           id: `ai-sum-${Date.now()}`,
-          title: title || `${courseTitle || 'Study'} High-Yield Summary`,
+          title: title || `${courseTitle || 'Study Notes'} High-Yield Summary`,
           originalText: materialText,
-          overview: `Synthesized overview of ${wordCount} words covering high-yield concepts and exam scenarios. (Note: To enable live Gemini AI generation, set GEMINI_API_KEY in server/.env).`,
-          keyConcepts: [
-            {
-              concept: 'Core Architecture Pattern',
-              definition: 'Foundational framework emphasizing fault tolerance, resilience, and least-privilege security.',
-            },
-            {
-              concept: 'Elastic Scaling & Health Checks',
-              definition: 'Dynamic resource adjustments in response to metric thresholds with automated instance lifecycle management.',
-            },
-            {
-              concept: 'Data Isolation & Encryption',
-              definition: 'Enforcing client/server-side encryption policies and strict network segmentation.',
-            },
-          ],
-          examHighYield: [
-            'Target high-availability scenarios requiring multi-region or multi-AZ automated failover.',
-            'Watch for questions testing transitive routing limits and bandwidth throughput.',
-            'Review permission boundary hierarchies and explicit deny precedence.',
-          ],
+          overview: sentences.slice(0, 2).join(' ').trim() || `Summary extracted from ${wordCount} words of user notes.`,
+          keyConcepts: concepts,
+          examHighYield: highYield,
           wordCount,
           estimatedStudyTimeMinutes: Math.max(10, Math.round(wordCount / 100) * 5),
           createdAt: new Date().toISOString(),
-          tags: ['StudyNotes', 'HighYield', courseTitle?.split(' ')[0] || 'Exam'],
+          tags: ['StudyNotes', 'Extracted', courseTitle?.split(' ')[0] || 'Certification'],
         },
       });
     }
@@ -90,7 +105,7 @@ Course: ${courseTitle || 'Technical Certification'}
 Document Title: ${title || 'Study Material'}
 
 Study Content:
-${materialText.slice(0, 15000)}
+${materialText.slice(0, 25000)}
 `;
 
     const response = await ai.models.generateContent({
@@ -109,7 +124,6 @@ ${materialText.slice(0, 15000)}
     try {
       parsed = JSON.parse(responseText);
     } catch {
-      // Clean possible stray backticks
       const cleaned = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
       parsed = JSON.parse(cleaned);
     }
@@ -119,20 +133,19 @@ ${materialText.slice(0, 15000)}
       title: parsed.title || title || 'Study Summary',
       originalText: materialText,
       overview: parsed.overview || 'Overview of key concepts.',
-      keyConcepts: parsed.keyConcepts || [],
-      examHighYield: parsed.examHighYield || [],
+      keyConcepts: Array.isArray(parsed.keyConcepts) ? parsed.keyConcepts : [],
+      examHighYield: Array.isArray(parsed.examHighYield) ? parsed.examHighYield : [],
       wordCount,
-      estimatedStudyTimeMinutes: parsed.estimatedStudyTimeMinutes || Math.max(10, Math.round(wordCount / 100) * 5),
+      estimatedStudyTimeMinutes: Number(parsed.estimatedStudyTimeMinutes) || Math.max(10, Math.round(wordCount / 100) * 5),
       createdAt: new Date().toISOString(),
-      tags: parsed.tags || ['AI-Generated', 'StudyNotes'],
+      tags: Array.isArray(parsed.tags) ? parsed.tags : ['AI-Generated', 'StudyNotes'],
     };
 
     return res.json({ summary });
   } catch (err: any) {
     console.error('Gemini proxy error:', err);
     return res.status(500).json({
-      message: 'Failed to process AI summary with Gemini.',
-      error: err.message,
+      message: 'Failed to process AI summary. Please verify the prompt and try again.',
     });
   }
 });

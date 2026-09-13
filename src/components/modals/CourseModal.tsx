@@ -26,7 +26,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
   const [mode, setMode] = useState<'switch' | 'create'>(courses.length > 0 ? 'switch' : 'create');
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
-  const [category, setCategory] = useState('Cloud & DevOps');
+  const [category, setCategory] = useState('');
   const [examDate, setExamDate] = useState('2026-11-20');
   const [targetHours, setTargetHours] = useState(15);
 
@@ -39,7 +39,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
       id: courseId,
       title: title.trim(),
       code: code.trim().toUpperCase() || 'CERT',
-      category,
+      category: category.trim() || 'General',
       examDate,
       targetHoursPerWeek: Number(targetHours) || 15,
       studiedHoursThisWeek: 0,
@@ -215,7 +215,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. AWS Solutions Architect Professional"
+                  placeholder="e.g. Distributed Systems Architecture or AP Biology"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
@@ -230,7 +230,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. SAP-C02"
+                    placeholder="e.g. CS-401"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
@@ -256,17 +256,28 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     Category Domain
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    list="category-domain-suggestions"
+                    placeholder="e.g. Computer Science, Medicine, Law"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
-                  >
-                    <option value="Cloud & DevOps">Cloud & DevOps</option>
-                    <option value="AI & Machine Learning">AI & Machine Learning</option>
-                    <option value="Cybersecurity">Cybersecurity</option>
-                    <option value="Software Engineering">Software Engineering</option>
-                    <option value="Data Science">Data Science</option>
-                  </select>
+                  />
+                  <datalist id="category-domain-suggestions">
+                    <option value="Computer Science" />
+                    <option value="Cloud Architecture" />
+                    <option value="Artificial Intelligence" />
+                    <option value="Cybersecurity" />
+                    <option value="Software Engineering" />
+                    <option value="Data Science" />
+                    <option value="Medicine & Health" />
+                    <option value="Biochemistry" />
+                    <option value="Business & Management" />
+                    <option value="Finance & Accounting" />
+                    <option value="Law & Legal Studies" />
+                    <option value="Mathematics" />
+                  </datalist>
                 </div>
 
                 <div>
@@ -275,8 +286,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                   </label>
                   <input
                     type="number"
-                    min="5"
-                    max="50"
+                    min="1"
+                    max="80"
                     value={targetHours}
                     onChange={(e) => setTargetHours(Number(e.target.value))}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"

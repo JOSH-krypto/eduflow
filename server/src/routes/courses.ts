@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+import { validateBody, createCourseSchema } from '../middleware/validate.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -65,13 +66,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // POST /api/courses
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/', authMiddleware, validateBody(createCourseSchema), async (req: AuthRequest, res) => {
   try {
     const { title, code, category, examDate, targetHoursPerWeek, phases, agenda } = req.body;
-
-    if (!title || !examDate) {
-      return res.status(400).json({ message: 'Title and target exam date are required.' });
-    }
 
     const course = await prisma.course.create({
       data: {
@@ -118,6 +115,26 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
   } catch (err: any) {
     console.error('Create course error:', err);
     return res.status(500).json({ message: 'Failed to create course track.' });
+  }
+});
+
+// DELETE /api/courses/:id
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const course = await prisma.course.findFirst({
+      where: { id, userId: req.userId },
+    });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found or unauthorized.' });
+    }
+
+    await prisma.course.delete({ where: { id } });
+    return res.json({ message: 'Course removed successfully.' });
+  } catch (err: any) {
+    console.error('Delete course error:', err);
+    return res.status(500).json({ message: 'Failed to delete course track.' });
   }
 });
 

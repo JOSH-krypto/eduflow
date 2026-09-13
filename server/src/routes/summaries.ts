@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+import { validateBody, createSummarySchema } from '../middleware/validate.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -20,7 +21,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // POST /api/summaries
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/', authMiddleware, validateBody(createSummarySchema), async (req: AuthRequest, res) => {
   try {
     const {
       title,
@@ -36,14 +37,18 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
       tags,
     } = req.body;
 
-    if (!title || !originalText || !overview) {
-      return res.status(400).json({ message: 'Title, original text, and overview are required.' });
+    let validCourseId: string | null = null;
+    if (courseId) {
+      const course = await prisma.course.findFirst({
+        where: { id: courseId, userId: req.userId },
+      });
+      if (course) validCourseId = course.id;
     }
 
     const summary = await prisma.researchSummary.create({
       data: {
         userId: req.userId!,
-        courseId: courseId || null,
+        courseId: validCourseId,
         title,
         originalText,
         fileName: fileName || null,
@@ -68,6 +73,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
+    const existing = await prisma.researchSummary.findFirst({
+      where: { id, userId: req.userId },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Summary not found or unauthorized.' });
+    }
+
     await prisma.researchSummary.delete({ where: { id } });
     return res.json({ message: 'Summary deleted.' });
   } catch (err: any) {

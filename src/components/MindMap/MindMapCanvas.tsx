@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ExamPlan, PlanEntry, StudyMode } from '../../types/plan';
-import { formatDate } from '../../data/sampleExams';
+import { formatDate } from '../../utils/dateUtils';
 import { RootNode } from './RootNode';
 import { PhaseColumn } from './PhaseColumn';
 import { EntryColumn } from './EntryColumn';

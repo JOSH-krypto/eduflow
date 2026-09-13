@@ -2,17 +2,28 @@ import { Router } from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
+import { validateBody, updateProfileSchema } from '../middleware/validate.js';
 import { storageService } from '../services/storage.js';
 
 const router = Router();
 const prisma = new PrismaClient();
+
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024 }, // 4MB
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIMES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid image type. Only JPEG, PNG, WebP, and GIF images up to 4MB are supported.'));
+    }
+  },
 });
 
 // PATCH /api/profile
-router.patch('/', authMiddleware, async (req: AuthRequest, res) => {
+router.patch('/', authMiddleware, validateBody(updateProfileSchema), async (req: AuthRequest, res) => {
   try {
     const { name, weeklyTargetHours, preferences, avatar } = req.body;
 
@@ -46,7 +57,19 @@ router.patch('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // POST /api/profile/avatar
-router.post('/avatar', authMiddleware, upload.single('avatar'), async (req: AuthRequest, res) => {
+router.post('/avatar', authMiddleware, (req, res, next) => {
+  upload.single('avatar')(req, res, (err: any) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'Image file size exceeds the 4MB limit.' });
+      }
+      return res.status(400).json({ message: `Upload error: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ message: err.message || 'File upload error.' });
+    }
+    next();
+  });
+}, async (req: AuthRequest, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image file uploaded.' });

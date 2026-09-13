@@ -17,10 +17,10 @@ export const ContinueLearningHero: React.FC<ContinueLearningHeroProps> = ({
   const inProgressPhase = course.phases.find(p => p.status === 'in_progress') || course.phases[0];
 
   // Resolve the actual next item
-  let nextItemTitle = 'Multi-AZ Auto Scaling & ALB Deployment';
+  let nextItemTitle = inProgressPhase?.title || course.title || 'Start Learning';
   let nextItemType: TaskType = 'lab';
   let nextItemDuration = 45;
-  let phaseNumber = inProgressPhase?.phaseNumber || 2;
+  let phaseNumber = inProgressPhase?.phaseNumber || 1;
   let phaseId = inProgressPhase?.id;
 
   if (currentTask) {

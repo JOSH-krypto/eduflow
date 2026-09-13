@@ -1,11 +1,39 @@
 import { Phase, SubTopic } from '../types/eduflow';
 
 /**
+ * Format a Date object to YYYY-MM-DD
+ */
+export function formatDate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Format date for short day labels (e.g. "Mon 14")
+ */
+export function formatShortDay(d: Date): string {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return `${days[d.getDay()]} ${d.getDate()}`;
+}
+
+/**
+ * Add days to a Date object
+ */
+export function addDays(d: Date, days: number): Date {
+  const result = new Date(d);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+/**
  * Compute the number of days remaining until the exam date
  */
-export function getDaysUntilExam(examDateStr: string): number {
-  if (!examDateStr) return 14;
+export function getDaysUntilExam(examDateStr?: string | null): number {
+  if (!examDateStr) return 0;
   const examDate = new Date(examDateStr);
+  if (isNaN(examDate.getTime())) return 0;
   const today = new Date();
   
   // Set both to start of day for clean day comparison
@@ -20,10 +48,11 @@ export function getDaysUntilExam(examDateStr: string): number {
 /**
  * Format a calendar date string (e.g. "Sep 24, 2026")
  */
-export function formatExamDate(examDateStr: string): string {
-  if (!examDateStr) return 'Oct 15, 2026';
+export function formatExamDate(examDateStr?: string | null): string {
+  if (!examDateStr) return '—';
   try {
     const d = new Date(examDateStr);
+    if (isNaN(d.getTime())) return examDateStr;
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',

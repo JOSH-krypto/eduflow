@@ -21,7 +21,7 @@ interface NavigationSidebarProps {
   onOpenFocusTimer: () => void;
   onOpenAiSummarizer: () => void;
   userProfile: UserProfile;
-  course: Course;
+  course?: Course | null;
   isBackendConnected?: boolean;
 }
 
@@ -70,7 +70,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           {/* App Logo Mark */}
           <div 
             onClick={() => onSelectTab('home')}
-            className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center shadow-card cursor-pointer hover:scale-105 transition-transform"
+            className="w-11 h-11 rounded-2xl bg-theme-accent text-white flex items-center justify-center shadow-card cursor-pointer hover:scale-105 transition-transform"
             title="EduFlow - Home"
           >
             <Sparkles className="w-5 h-5 text-white" />
@@ -80,7 +80,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsQuickActionsDropdownOpen(!isQuickActionsDropdownOpen)}
-              className="w-12 h-12 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center shadow-float-btn transition-all duration-200 active:scale-95"
+              className="w-12 h-12 rounded-full bg-theme-accent hover:opacity-90 text-white flex items-center justify-center shadow-float-btn transition-all duration-200 active:scale-95 cursor-pointer"
               aria-label="Quick Actions Menu"
               title="Add activity / Focus session"
             >
@@ -98,9 +98,9 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenAddTask();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-violet-50/60 hover:bg-violet-100/70 text-violet-900 flex items-center gap-3 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-theme-light hover:bg-theme-subtle text-theme-dark flex items-center gap-3 transition text-left cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-xl bg-theme-accent text-white flex items-center justify-center shrink-0">
                     <Plus className="w-4 h-4" />
                   </div>
                   <div>
@@ -114,7 +114,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenFocusTimer();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 flex items-center gap-3 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 flex items-center gap-3 transition text-left cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
                     <Timer className="w-4 h-4" />
@@ -130,7 +130,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenAiSummarizer();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-amber-50/60 hover:bg-amber-100/70 text-amber-900 flex items-center gap-3 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-amber-50/60 hover:bg-amber-100/70 text-amber-900 flex items-center gap-3 transition text-left cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
                     <BookOpen className="w-4 h-4" />
@@ -155,16 +155,16 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                   key={item.id}
                   onClick={() => onSelectTab(item.id)}
                   title={item.label}
-                  className={`relative p-3 rounded-2xl transition-all duration-200 ${
+                  className={`relative p-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-violet-100/80 text-violet-700 shadow-soft scale-105'
+                      ? 'bg-theme-light text-theme-dark shadow-soft scale-105'
                       : 'text-zinc-400 hover:text-zinc-700 hover:bg-purple-50/60'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <Icon className="w-5 h-5 stroke-[2.2]" />
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-violet-600 rounded-r-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-theme-accent rounded-r-full" />
                   )}
                 </button>
               );
@@ -175,11 +175,11 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
         {/* Bottom Avatar */}
         <div 
           onClick={() => onSelectTab('profile')}
-          className="cursor-pointer p-1 rounded-full ring-2 ring-purple-100 hover:ring-violet-400 transition"
+          className="cursor-pointer p-1 rounded-full ring-2 ring-purple-100 hover:ring-theme-accent transition"
           title="Student Profile"
         >
           <InitialsAvatar
-            name={userProfile.name}
+            name={userProfile.name || 'Student'}
             avatarUrl={userProfile.avatar}
             size="sm"
           />
@@ -199,15 +199,15 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             onClick={() => onSelectTab('home')}
             className="flex items-center gap-3 cursor-pointer group px-1"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center shadow-card group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-2xl bg-theme-accent text-white flex items-center justify-center shadow-card group-hover:scale-105 transition-transform">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-extrabold text-[#1E1B4B] font-heading tracking-tight group-hover:text-violet-700 transition-colors">
+                <span className="text-base font-extrabold text-[#1E1B4B] font-heading tracking-tight group-hover:text-theme-dark transition-colors">
                   EduFlow
                 </span>
-                <span className="px-1.5 py-0.2 rounded-md bg-violet-100 text-[10px] font-bold text-violet-700">
+                <span className="px-1.5 py-0.2 rounded-md bg-theme-light text-[10px] font-bold text-theme-dark">
                   AI
                 </span>
               </div>
@@ -221,7 +221,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsQuickActionsDropdownOpen(!isQuickActionsDropdownOpen)}
-              className="w-full py-3 px-4 bg-violet-600 hover:bg-violet-700 active:scale-[0.98] text-white font-bold rounded-2xl shadow-card transition-all flex items-center justify-between text-xs font-heading"
+              className="w-full py-3 px-4 bg-theme-accent hover:opacity-90 active:scale-[0.98] text-white font-bold rounded-2xl shadow-card transition-all flex items-center justify-between text-xs font-heading cursor-pointer"
               aria-label="New Focus Activity"
             >
               <div className="flex items-center gap-2">
@@ -244,10 +244,10 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenAddTask();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-violet-50/60 hover:bg-violet-100/70 text-violet-900 flex items-center gap-2.5 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-theme-light hover:bg-theme-subtle text-theme-dark flex items-center gap-2.5 transition text-left cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0">
-                    <Plus className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-xl bg-theme-accent text-white flex items-center justify-center shrink-0">
+                    <Plus className="w-4 h-4" />
                   </div>
                   <div>
                     <div className="text-xs font-bold font-heading">Add Study Task</div>
@@ -260,14 +260,14 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenFocusTimer();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 flex items-center gap-2.5 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-teal-50/60 hover:bg-teal-100/70 text-teal-900 flex items-center gap-2.5 transition text-left cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
-                    <Timer className="w-3.5 h-3.5" />
+                    <Timer className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold font-heading">Start Focus Session</div>
-                    <div className="text-[10px] text-zinc-400">Pomodoro deep work mode</div>
+                    <div className="text-xs font-bold font-heading">Start Focus Timer</div>
+                    <div className="text-[10px] text-zinc-400">Pomodoro focus sprint</div>
                   </div>
                 </button>
 
@@ -276,22 +276,22 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     setIsQuickActionsDropdownOpen(false);
                     onOpenAiSummarizer();
                   }}
-                  className="w-full p-2.5 rounded-2xl bg-amber-50/60 hover:bg-amber-100/70 text-amber-900 flex items-center gap-2.5 transition text-left"
+                  className="w-full p-2.5 rounded-2xl bg-amber-50/60 hover:bg-amber-100/70 text-amber-900 flex items-center gap-2.5 transition text-left cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
-                    <BookOpen className="w-3.5 h-3.5" />
+                    <BookOpen className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold font-heading">AI Research Summarizer</div>
-                    <div className="text-[10px] text-zinc-400">Extract high-yield study cards</div>
+                    <div className="text-xs font-bold font-heading">AI Research Notes</div>
+                    <div className="text-[10px] text-zinc-400">Summarize PDF / text</div>
                   </div>
                 </button>
               </div>
             )}
           </div>
 
-          {/* Navigation Links */}
-          <nav className="space-y-1.5" aria-label="Desktop Navigation Links">
+          {/* Desktop Navigation Link Items List */}
+          <nav className="space-y-1.5">
             <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading">
               Main Menu
             </div>
@@ -303,22 +303,22 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => onSelectTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold font-heading transition-all duration-200 ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 font-heading cursor-pointer ${
                     isActive
-                      ? 'bg-violet-50/90 text-violet-700 shadow-soft border border-violet-100'
-                      : 'text-zinc-500 hover:text-zinc-800 hover:bg-purple-50/40'
+                      ? 'bg-theme-light text-theme-dark shadow-soft border border-theme-border'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-purple-50/50'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-violet-100 text-violet-700' : 'bg-transparent text-zinc-400'}`}>
+                    <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-theme-light text-theme-dark' : 'bg-transparent text-zinc-400'}`}>
                       <Icon className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-violet-100 text-violet-700">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-theme-light text-theme-dark">
                       {item.badge}
                     </span>
                   )}
@@ -336,11 +336,11 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
               Active Target
             </div>
             <div className="text-xs font-bold text-[#1E1B4B] truncate mt-0.5">
-              {course.title}
+              {course ? course.title : 'No active study target'}
             </div>
-            <div className="flex items-center justify-between text-[11px] text-violet-700 font-medium mt-1">
-              <span>{course.code}</span>
-              <span className="font-bold">{course.streakDays}d Streak 🔥</span>
+            <div className="flex items-center justify-between text-[11px] text-theme-dark font-medium mt-1">
+              <span>{course ? course.code : 'Setup Course'}</span>
+              <span className="font-bold">{course && course.streakDays > 0 ? `${course.streakDays}d Streak 🔥` : '0d Streak'}</span>
             </div>
           </div>
 
@@ -351,16 +351,16 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <InitialsAvatar
-                name={userProfile.name}
+                name={userProfile.name || 'Student'}
                 avatarUrl={userProfile.avatar}
                 size="sm"
               />
               <div className="min-w-0">
                 <span className="text-xs font-bold text-[#1E1B4B] truncate block font-heading">
-                  {userProfile.name}
+                  {userProfile.name || 'Student'}
                 </span>
                 <span className="text-[10px] text-zinc-400 truncate block">
-                  {userProfile.email}
+                  {userProfile.email || 'Free Account'}
                 </span>
               </div>
             </div>
@@ -368,7 +368,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
             <div 
               title={isBackendConnected ? 'Cloud Synced' : 'Offline Ready'}
               className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: isBackendConnected ? '#10B981' : '#8B5CF6' }}
+              style={{ backgroundColor: isBackendConnected ? '#10B981' : 'var(--theme-accent)' }}
             />
           </div>
         </div>
@@ -376,3 +376,5 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     </>
   );
 };
+
+export default NavigationSidebar;

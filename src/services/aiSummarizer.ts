@@ -188,21 +188,24 @@ function generateLocalIntelligentSummary(
     }
   }
 
-  // Fallback defaults if text had unstructured prose
+  // Fallback defaults if text had unstructured prose — extract directly from key sentences
   if (concepts.length === 0) {
-    concepts.push(
-      { concept: 'Core Architecture Patterns', definition: 'Follows standardized principles of high availability, security isolation, and fault tolerance.' },
-      { concept: 'Resource Scaling & Resilience', definition: 'Automated elastic scaling based on workload thresholds with cross-zone disaster recovery.' },
-      { concept: 'Governance & Access Boundaries', definition: 'Enforcing least-privilege identity federation, encryption-at-rest, and transit protections.' }
-    );
+    const keySentences = sentences.slice(0, 3);
+    keySentences.forEach((s, i) => {
+      concepts.push({
+        concept: `Key Topic ${i + 1}`,
+        definition: s.trim(),
+      });
+    });
   }
 
   if (highYield.length === 0) {
-    highYield.push(
-      'Exam Scenarios frequently test multi-region disaster recovery latency trade-offs vs synchronous multi-AZ standby replication.',
-      'Always identify single points of failure in questions mentioning 99.99% availability SLAs.',
-      'Review service limits, default timeout values, and explicit deny policy evaluation hierarchies.'
-    );
+    const remainingSentences = sentences.slice(3, 6);
+    if (remainingSentences.length > 0) {
+      remainingSentences.forEach(s => highYield.push(s.trim()));
+    } else {
+      highYield.push(`Review core definitions and practice questions for ${courseTitle}.`);
+    }
   }
 
   return {

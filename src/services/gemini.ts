@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { GeminiPlanResponse, Phase, StudyMode } from '../types/plan';
-import { formatDate, addDays, formatShortDay } from '../data/sampleExams';
+import { formatDate, addDays, formatShortDay } from '../utils/dateUtils';
 import { getStoredApiKey } from './storage';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

@@ -33,7 +33,7 @@ interface HomeTabProps {
 
 export const HomeTab: React.FC<HomeTabProps> = ({
   course,
-  userProfile,
+  userProfile: _userProfile,
   onContinueSession,
   onToggleTask,
   onOpenAllTasks,
@@ -136,9 +136,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
   const categoryData = Object.values(categoryHoursMap).filter((c) => c.hours > 0);
   const totalCategoryHours = categoryData.reduce((acc, c) => acc + c.hours, 0);
-
-  // Fallback empty donut data if no hours logged yet
-  const emptyDonutData = [{ name: 'No Data', value: 1, color: '#E2E8F0' }];
 
   // Dynamic AI Insight generation based on actual user data
   const hasEnoughHistory = completedCount >= 2 || course.studiedHoursThisWeek > 0;

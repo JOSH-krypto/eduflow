@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExamPlan } from '../../types/plan';
-import { formatDate } from '../../data/sampleExams';
+import { formatDate } from '../../utils/dateUtils';
 import { Clock, Award } from 'lucide-react';
 
 interface RootNodeProps {

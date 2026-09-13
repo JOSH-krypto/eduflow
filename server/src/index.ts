@@ -26,15 +26,28 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // CORS configuration for cross-origin httpOnly cookie auth
+const rawAllowed = process.env.ALLOWED_ORIGINS || CLIENT_URL;
+const allowedOrigins = rawAllowed
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+// Always allow standard dev origins in non-production
+const defaultDevOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow localhost dev origins and configured CLIENT_URL
-      if (!origin || origin === CLIENT_URL || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        callback(null, true);
-      } else {
-        callback(null, true); // Allow configured deployments
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      
+      if (
+        allowedOrigins.includes(origin) ||
+        (process.env.NODE_ENV !== 'production' && defaultDevOrigins.includes(origin))
+      ) {
+        return callback(null, true);
       }
+      return callback(new Error(`Origin ${origin} is not allowed by EduFlow CORS security policy.`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

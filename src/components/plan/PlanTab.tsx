@@ -6,8 +6,7 @@ import {
   Terminal, 
   ArrowRight, 
   Clock, 
-  Compass,
-  PlusCircle
+  Compass
 } from 'lucide-react';
 import { Course, Phase, SubTopic } from '../../types/eduflow';
 import { getPhaseDynamicDateRange } from '../../utils/dateUtils';

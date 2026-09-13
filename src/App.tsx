@@ -24,6 +24,8 @@ import {
 } from './services/storage';
 import { fireCelebrationConfetti, fireSmallBurst } from './services/confetti';
 import { api } from './services/api';
+import { applyTheme } from './utils/theme';
+import { SAMPLE_AWS_COURSE_TEMPLATE } from './data/sampleCourseTemplate';
 
 // Layout Components
 import { AppHeader } from './components/layout/AppHeader';
@@ -49,7 +51,7 @@ import { Toast, ToastData } from './components/ui/Toast';
 export const App: React.FC = () => {
   // Main Data States
   const [courses, setCourses] = useState<Course[]>([]);
-  const [activeCourseId, setActiveCourseIdState] = useState<string>('aws-saa-c03');
+  const [activeCourseId, setActiveCourseIdState] = useState<string>('');
   const [userProfile, setUserProfile] = useState<UserProfile>(loadUserProfile());
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [summaries, setSummaries] = useState<ResearchSummary[]>([]);
@@ -75,9 +77,9 @@ export const App: React.FC = () => {
     duration?: number;
     taskId?: string;
   }>({
-    title: 'Multi-AZ Auto Scaling & ALB Deployment',
-    type: 'lab',
-    duration: 30,
+    title: 'Deep Focus Session',
+    type: 'video',
+    duration: 25,
   });
 
   // Show floating toast
@@ -102,10 +104,13 @@ export const App: React.FC = () => {
     const loadedProfile = loadUserProfile();
 
     setCourses(loadedCourses);
-    setActiveCourseIdState(storedActiveId);
+    setActiveCourseIdState(storedActiveId || (loadedCourses[0]?.id ?? ''));
     setNotifications(loadedNotifs);
     setSummaries(loadedSummaries);
     setUserProfile(loadedProfile);
+
+    // Apply active theme tokens
+    applyTheme(loadedProfile.preferences?.accentColor);
 
     // Test backend connection
     api.healthCheck().then((healthy: boolean) => {
@@ -115,13 +120,14 @@ export const App: React.FC = () => {
 
   // Sync back to storage on state change
   useEffect(() => {
-    if (courses.length > 0) {
-      saveCourses(courses);
-    }
+    saveCourses(courses);
   }, [courses]);
 
   useEffect(() => {
     saveUserProfile(userProfile);
+    if (userProfile.preferences?.accentColor) {
+      applyTheme(userProfile.preferences.accentColor);
+    }
   }, [userProfile]);
 
   useEffect(() => {
@@ -129,7 +135,7 @@ export const App: React.FC = () => {
   }, [notifications]);
 
   // Current Active Course
-  const activeCourse = courses.find((c) => c.id === activeCourseId) || courses[0];
+  const activeCourse = courses.find((c) => c.id === activeCourseId) || courses[0] || null;
 
   const handleSelectCourse = (courseId: string) => {
     setActiveCourseIdState(courseId);
@@ -138,6 +144,19 @@ export const App: React.FC = () => {
     if (selected) {
       triggerToast('Course Switched', `Active path: ${selected.title}`, 'info');
     }
+  };
+
+  const handleLoadSampleTemplate = () => {
+    const existing = courses.find((c) => c.id === SAMPLE_AWS_COURSE_TEMPLATE.id);
+    if (existing) {
+      handleSelectCourse(existing.id);
+      triggerToast('Sample Course Selected', 'AWS Solutions Architect track activated.', 'info');
+      return;
+    }
+    const updated = [SAMPLE_AWS_COURSE_TEMPLATE, ...courses];
+    setCourses(updated);
+    handleSelectCourse(SAMPLE_AWS_COURSE_TEMPLATE.id);
+    triggerToast('Sample Template Added', 'AWS Solutions Architect track is ready.', 'success');
   };
 
   const handleUpdateProfile = (updated: UserProfile) => {
@@ -150,7 +169,7 @@ export const App: React.FC = () => {
     if (!activeCourse) return;
 
     let justCompleted = false;
-    const updatedAgenda = activeCourse.agenda.map((task) => {
+    const updatedAgenda = (activeCourse.agenda || []).map((task) => {
       if (task.id === taskId) {
         const newStatus = task.status === 'completed' ? 'current' : 'completed';
         if (newStatus === 'completed') {
@@ -166,15 +185,15 @@ export const App: React.FC = () => {
       return task;
     });
 
-    const updatedPhases = recalculatePhaseProgress(activeCourse.phases, updatedAgenda);
+    const updatedPhases = recalculatePhaseProgress(activeCourse.phases || [], updatedAgenda);
 
     const updatedCourse: Course = {
       ...activeCourse,
       agenda: updatedAgenda,
       phases: updatedPhases,
       completedSessionsToday: justCompleted
-        ? activeCourse.completedSessionsToday + 1
-        : Math.max(0, activeCourse.completedSessionsToday - 1),
+        ? (activeCourse.completedSessionsToday || 0) + 1
+        : Math.max(0, (activeCourse.completedSessionsToday || 0) - 1),
     };
 
     const updatedCourses = courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c));
@@ -188,7 +207,11 @@ export const App: React.FC = () => {
 
   // Add Task to Agenda
   const handleAddTask = (newTaskData: Omit<AgendaTask, 'id' | 'status'>) => {
-    if (!activeCourse) return;
+    if (!activeCourse) {
+      triggerToast('Create a Plan First', 'Please create a study course before scheduling tasks.', 'info');
+      setIsCourseModalOpen(true);
+      return;
+    }
 
     const newTask: AgendaTask = {
       ...newTaskData,
@@ -197,8 +220,8 @@ export const App: React.FC = () => {
       progressPercent: 0,
     };
 
-    const updatedAgenda = [newTask, ...activeCourse.agenda];
-    const updatedPhases = recalculatePhaseProgress(activeCourse.phases, updatedAgenda);
+    const updatedAgenda = [newTask, ...(activeCourse.agenda || [])];
+    const updatedPhases = recalculatePhaseProgress(activeCourse.phases || [], updatedAgenda);
 
     const updatedCourse: Course = {
       ...activeCourse,
@@ -240,17 +263,17 @@ export const App: React.FC = () => {
     const addedHours = Math.round((durationMinutes / 60) * 10) / 10;
     const updatedCourse: Course = {
       ...activeCourse,
-      studiedHoursThisWeek: Math.round((activeCourse.studiedHoursThisWeek + addedHours) * 10) / 10,
-      completedSessionsToday: activeCourse.completedSessionsToday + 1,
+      studiedHoursThisWeek: Math.round(((activeCourse.studiedHoursThisWeek || 0) + addedHours) * 10) / 10,
+      completedSessionsToday: (activeCourse.completedSessionsToday || 0) + 1,
     };
 
     if (focusSessionData.taskId) {
-      updatedCourse.agenda = updatedCourse.agenda.map((t) =>
+      updatedCourse.agenda = (updatedCourse.agenda || []).map((t) =>
         t.id === focusSessionData.taskId
           ? { ...t, status: 'completed', progressPercent: 100 }
           : t
       );
-      updatedCourse.phases = recalculatePhaseProgress(updatedCourse.phases, updatedCourse.agenda);
+      updatedCourse.phases = recalculatePhaseProgress(updatedCourse.phases || [], updatedCourse.agenda);
     }
 
     const updatedCourses = courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c));
@@ -258,7 +281,7 @@ export const App: React.FC = () => {
 
     setUserProfile((prev) => ({
       ...prev,
-      totalHoursStudied: Math.round((prev.totalHoursStudied + addedHours) * 10) / 10,
+      totalHoursStudied: Math.round(((prev.totalHoursStudied || 0) + addedHours) * 10) / 10,
     }));
 
     fireCelebrationConfetti();
@@ -287,23 +310,19 @@ export const App: React.FC = () => {
     }
   };
 
-  if (!activeCourse) {
-    return (
-      <div className="min-h-screen bg-[#F8F7FC] flex items-center justify-center p-4">
-        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#F8F7FC] text-slate-800 font-sans antialiased selection:bg-violet-200 selection:text-violet-900 flex flex-col md:flex-row">
-      {/* =========================================================================
-          TABLET SLIM RAIL (md:) & DESKTOP PERSISTENT SIDEBAR (lg:)
-          ========================================================================= */}
+    <div className="min-h-screen bg-[#F8F7FC] text-slate-800 font-sans antialiased selection:bg-purple-200 selection:text-purple-900 flex flex-col md:flex-row">
+      {/* Tablet Slim Rail & Desktop Persistent Sidebar */}
       <NavigationSidebar
         activeTab={activeTab}
         onSelectTab={(tab) => setActiveTab(tab)}
-        onOpenAddTask={() => setIsAddTaskOpen(true)}
+        onOpenAddTask={() => {
+          if (!activeCourse) {
+            setIsCourseModalOpen(true);
+          } else {
+            setIsAddTaskOpen(true);
+          }
+        }}
         onOpenFocusTimer={() => setIsFocusTimerOpen(true)}
         onOpenAiSummarizer={() => setIsAiSummarizerOpen(true)}
         userProfile={userProfile}
@@ -311,9 +330,7 @@ export const App: React.FC = () => {
         isBackendConnected={isBackendConnected}
       />
 
-      {/* =========================================================================
-          MAIN CONTENT AREA (Spans remaining width)
-          ========================================================================= */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen relative pb-20 md:pb-8">
         {/* Responsive Sticky Header */}
         <AppHeader
@@ -322,6 +339,7 @@ export const App: React.FC = () => {
           courses={courses}
           onSelectCourse={handleSelectCourse}
           onOpenProfile={() => setActiveTab('profile')}
+          onOpenCreateCourse={() => setIsCourseModalOpen(true)}
           notifications={notifications}
           onMarkAllNotificationsRead={handleMarkAllNotifsRead}
           onSelectNotification={handleSelectNotification}
@@ -339,6 +357,8 @@ export const App: React.FC = () => {
               onToggleTask={handleToggleTask}
               onOpenAllTasks={() => setActiveTab('plan')}
               onOpenQuickActions={() => setIsQuickActionsOpen(true)}
+              onOpenCreateCourse={() => setIsCourseModalOpen(true)}
+              onLoadSampleTemplate={handleLoadSampleTemplate}
               searchFilter={searchQuery}
             />
           )}
@@ -348,6 +368,7 @@ export const App: React.FC = () => {
               course={activeCourse}
               onOpenPhaseDetail={(phase) => setSelectedPhaseForDetail(phase)}
               onStartStudyTopic={handleStartPlanTopic}
+              onOpenCreateCourse={() => setIsCourseModalOpen(true)}
             />
           )}
 
@@ -385,7 +406,11 @@ export const App: React.FC = () => {
         onClose={() => setIsQuickActionsOpen(false)}
         onOpenAddTask={() => {
           setIsQuickActionsOpen(false);
-          setIsAddTaskOpen(true);
+          if (!activeCourse) {
+            setIsCourseModalOpen(true);
+          } else {
+            setIsAddTaskOpen(true);
+          }
         }}
         onOpenFocusTimer={() => {
           setIsQuickActionsOpen(false);
@@ -398,12 +423,14 @@ export const App: React.FC = () => {
       />
 
       {/* Add Task Modal */}
-      <AddTaskModal
-        isOpen={isAddTaskOpen}
-        onClose={() => setIsAddTaskOpen(false)}
-        onAddTask={handleAddTask}
-        phases={activeCourse.phases}
-      />
+      {activeCourse && (
+        <AddTaskModal
+          isOpen={isAddTaskOpen}
+          onClose={() => setIsAddTaskOpen(false)}
+          onAddTask={handleAddTask}
+          phases={activeCourse.phases || []}
+        />
+      )}
 
       {/* Focus Timer Modal */}
       <FocusTimerModal
@@ -419,7 +446,7 @@ export const App: React.FC = () => {
       <ResearchSummarizerModal
         isOpen={isAiSummarizerOpen}
         onClose={() => setIsAiSummarizerOpen(false)}
-        course={activeCourse}
+        course={activeCourse || undefined as any}
         summaries={summaries}
         onSaveSummary={handleSaveSummary}
         onAddTaskToAgenda={handleAddTask}
@@ -446,9 +473,11 @@ export const App: React.FC = () => {
         activeCourseId={activeCourseId}
         onSelectCourse={handleSelectCourse}
         onCreateCourse={(newCourse) => {
-          setCourses([...courses, newCourse]);
+          const updated = [newCourse, ...courses];
+          setCourses(updated);
           handleSelectCourse(newCourse.id);
           setIsCourseModalOpen(false);
+          triggerToast('Study Plan Created! 🚀', `"${newCourse.title}" is now active.`, 'success');
         }}
       />
 

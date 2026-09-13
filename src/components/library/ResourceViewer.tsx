@@ -35,19 +35,17 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [userNotes, setUserNotes] = useState('');
 
-  const flashcards = resource.flashcards || [
-    { id: 'fc-def-1', question: `What is the primary architectural concept behind ${resource.title}?`, answer: 'High availability, fault tolerance, and security boundary isolation following the Well-Architected Framework.', tag: 'Core Concept' },
-    { id: 'fc-def-2', question: 'How is state consistency maintained during a regional failover?', answer: 'Using synchronous multi-AZ standby replication or asynchronous cross-region replicas with automated route redirection.', tag: 'Resilience' },
-  ];
-
-  const currentCard = flashcards[currentFlashcardIndex];
+  const flashcards = resource.flashcards || [];
+  const currentCard = flashcards.length > 0 ? flashcards[currentFlashcardIndex % flashcards.length] : null;
 
   const handleNextCard = () => {
+    if (flashcards.length === 0) return;
     setIsFlipped(false);
     setCurrentFlashcardIndex((prev) => (prev + 1) % flashcards.length);
   };
 
   const handlePrevCard = () => {
+    if (flashcards.length === 0) return;
     setIsFlipped(false);
     setCurrentFlashcardIndex((prev) => (prev - 1 + flashcards.length) % flashcards.length);
   };
@@ -168,64 +166,72 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({
 
           {/* TAB 2: Interactive Flashcards Flip Mode */}
           {activeTab === 'flashcards' && (
-            <div className="flex flex-col items-center justify-center py-4 space-y-6">
-              <div className="flex items-center justify-between w-full max-w-md text-xs text-zinc-400">
-                <span>Card {currentFlashcardIndex + 1} of {flashcards.length}</span>
-                <span className="px-2 py-0.5 rounded bg-white/[0.06] text-zinc-300 text-[10px] uppercase font-bold">
-                  {currentCard?.tag || 'General'}
-                </span>
+            flashcards.length === 0 ? (
+              <div className="p-12 text-center bg-[#0D0D0F] rounded-2xl border border-white/[0.06] my-4">
+                <Sparkles className="w-8 h-8 text-[#2DD4BF] mx-auto mb-2 opacity-60" />
+                <p className="text-white font-bold text-sm">No flashcards available</p>
+                <p className="text-xs text-zinc-500 mt-1">This topic does not have flashcards generated yet.</p>
               </div>
-
-              {/* 3D Flip Card */}
-              <div
-                onClick={() => setIsFlipped(!isFlipped)}
-                className="w-full max-w-md h-60 rounded-3xl bg-gradient-to-br from-[#18181C] to-[#121817] border border-white/[0.12] hover:border-[#2DD4BF]/50 p-6 flex flex-col justify-between cursor-pointer shadow-2xl relative transition-all duration-300 transform hover:scale-[1.02] select-none"
-                role="button"
-                tabIndex={0}
-                aria-label="Flip flashcard"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                    {isFlipped ? '💡 ANSWER' : '❓ QUESTION'}
+            ) : (
+              <div className="flex flex-col items-center justify-center py-4 space-y-6">
+                <div className="flex items-center justify-between w-full max-w-md text-xs text-zinc-400">
+                  <span>Card {currentFlashcardIndex + 1} of {flashcards.length}</span>
+                  <span className="px-2 py-0.5 rounded bg-white/[0.06] text-zinc-300 text-[10px] uppercase font-bold">
+                    {currentCard?.tag || 'General'}
                   </span>
-                  <div className="p-1.5 rounded-lg bg-white/[0.04] text-zinc-400 flex items-center gap-1 text-[10px]">
-                    <RotateCw className="w-3 h-3" />
-                    <span>Click to Flip</span>
+                </div>
+
+                {/* 3D Flip Card */}
+                <div
+                  onClick={() => setIsFlipped(!isFlipped)}
+                  className="w-full max-w-md h-60 rounded-3xl bg-gradient-to-br from-[#18181C] to-[#121817] border border-white/[0.12] hover:border-[#2DD4BF]/50 p-6 flex flex-col justify-between cursor-pointer shadow-2xl relative transition-all duration-300 transform hover:scale-[1.02] select-none"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Flip flashcard"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                      {isFlipped ? '💡 ANSWER' : '❓ QUESTION'}
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-white/[0.04] text-zinc-400 flex items-center gap-1 text-[10px]">
+                      <RotateCw className="w-3 h-3" />
+                      <span>Click to Flip</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex items-center justify-center text-center px-4">
+                    <p className={`font-medium ${isFlipped ? 'text-[#2DD4BF] text-sm leading-relaxed font-sans' : 'text-white text-base font-display font-semibold'}`}>
+                      {isFlipped ? currentCard?.answer : currentCard?.question}
+                    </p>
+                  </div>
+
+                  <div className="text-center text-[10px] text-zinc-500">
+                    {isFlipped ? 'Tap card again to return to question' : 'Tap to reveal correct answer'}
                   </div>
                 </div>
 
-                <div className="flex-1 flex items-center justify-center text-center px-4">
-                  <p className={`font-medium ${isFlipped ? 'text-[#2DD4BF] text-sm leading-relaxed font-sans' : 'text-white text-base font-display font-semibold'}`}>
-                    {isFlipped ? currentCard?.answer : currentCard?.question}
-                  </p>
-                </div>
+                {/* Next / Previous Controls */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePrevCard}
+                    className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-semibold text-white flex items-center gap-1.5 transition-colors"
+                    aria-label="Previous flashcard"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Previous</span>
+                  </button>
 
-                <div className="text-center text-[10px] text-zinc-500">
-                  {isFlipped ? 'Tap card again to return to question' : 'Tap to reveal correct answer'}
+                  <button
+                    onClick={handleNextCard}
+                    className="px-5 py-2 rounded-xl bg-[#2DD4BF] hover:bg-[#14B8A6] text-black text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md"
+                    aria-label="Next flashcard"
+                  >
+                    <span>Next Card</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              {/* Next / Previous Controls */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handlePrevCard}
-                  className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-semibold text-white flex items-center gap-1.5 transition-colors"
-                  aria-label="Previous flashcard"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
-                </button>
-
-                <button
-                  onClick={handleNextCard}
-                  className="px-5 py-2 rounded-xl bg-[#2DD4BF] hover:bg-[#14B8A6] text-black text-xs font-bold flex items-center gap-1.5 transition-colors shadow-md"
-                  aria-label="Next flashcard"
-                >
-                  <span>Next Card</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            )
           )}
 
           {/* TAB 3: User Notes */}

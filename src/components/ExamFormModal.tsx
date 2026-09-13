@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ExamPlan } from '../types/plan';
-import { formatDate, addDays } from '../data/sampleExams';
+import { formatDate, addDays } from '../utils/dateUtils';
 import { Sparkles, X, Info, Calendar, BookOpen, Clock, AlertCircle } from 'lucide-react';
 
 interface ExamFormModalProps {
@@ -56,9 +56,7 @@ export const ExamFormModal: React.FC<ExamFormModalProps> = ({
     } else {
       setTitle('');
       setExamDate(defaultExamDate);
-      setSyllabus(
-        `Calculus & Differential Equations (hard)\nLinear Algebra & Eigenvalues\nProbability & Bayes Theorem\nStatistical Inference & Hypothesis Testing (hard)\nOptimization & Gradient Descent\nRegression Models & Error Analysis`
-      );
+      setSyllabus('');
       setStudyDays([1, 2, 3, 4, 5, 6]);
       setHoursPerDay(3);
     }
