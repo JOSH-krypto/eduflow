@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { ResearchSummary } from '../types/eduflow';
 import { getStoredApiKey } from './storage';
+import { api } from './api';
 
 export interface SummarizeParams {
   materialText: string;
@@ -11,7 +12,7 @@ export interface SummarizeParams {
 
 export interface SummarizerStatus {
   hasKey: boolean;
-  source: 'env' | 'localStorage' | 'none';
+  source: 'env' | 'localStorage' | 'backend' | 'none';
   keyMasked: string;
 }
 
@@ -35,9 +36,9 @@ export function getGeminiApiKeyStatus(): SummarizerStatus {
   }
 
   return {
-    hasKey: false,
-    source: 'none',
-    keyMasked: '',
+    hasKey: true,
+    source: 'backend',
+    keyMasked: 'Server-Side Managed',
   };
 }
 
@@ -49,7 +50,6 @@ export function getEffectiveApiKey(): string {
 
 export async function summarizeResearchMaterial(params: SummarizeParams): Promise<Omit<ResearchSummary, 'id' | 'createdAt'>> {
   const { materialText, courseTitle = 'Certification Exam', fileName, customPromptFocus } = params;
-  const apiKey = getEffectiveApiKey();
 
   if (!materialText || materialText.trim().length < 20) {
     throw new Error('Please provide at least 20 characters of study material to summarize.');
@@ -61,22 +61,41 @@ export async function summarizeResearchMaterial(params: SummarizeParams): Promis
     textToAnalyze = textToAnalyze.substring(0, 60000) + '\n\n[...Content truncated for model token length...]';
   }
 
+  // 1. Try Backend Proxy First (Keeps Gemini API key secure on server)
+  try {
+    const backendSummary = await api.summarizeResearchMaterial(
+      textToAnalyze,
+      fileName ? fileName.replace(/\.[^/.]+$/, '') : `${courseTitle} Study Summary`,
+      undefined
+    );
+    return {
+      title: backendSummary.title || fileName || `${courseTitle} Summary`,
+      originalText: textToAnalyze,
+      fileName,
+      overview: backendSummary.overview,
+      keyConcepts: backendSummary.keyConcepts || [],
+      examHighYield: backendSummary.examHighYield || [],
+      wordCount: textToAnalyze.split(/\s+/).filter(Boolean).length,
+      estimatedStudyTimeMinutes: backendSummary.estimatedStudyTimeMinutes || 20,
+      tags: backendSummary.tags || ['StudyNotes', 'ExamPrep'],
+    };
+  } catch (backendErr) {
+    console.warn('Backend AI proxy unavailable, attempting client fallback:', backendErr);
+  }
+
+  // 2. Client-side fallback if a local key is configured
+  const apiKey = getEffectiveApiKey();
   if (apiKey) {
     try {
       return await callGeminiAPI(apiKey, textToAnalyze, courseTitle, fileName, customPromptFocus);
     } catch (err: any) {
-      console.warn('Gemini API call failed, falling back to local heuristic analysis:', err);
-      // If error is invalid API key or network failure, surface clear message
-      if (err.message && (err.message.includes('API_KEY_INVALID') || err.message.includes('permission'))) {
-        throw new Error(`Gemini API Authentication Error: ${err.message}. Please check your API key in the configuration bar.`);
-      }
-      // Provide high-quality local analysis with clear notice
+      console.warn('Direct Gemini call failed, generating local intelligent analysis:', err);
       return generateLocalIntelligentSummary(textToAnalyze, courseTitle, fileName);
     }
-  } else {
-    // No API key provided: inform user and generate local intelligent summary
-    return generateLocalIntelligentSummary(textToAnalyze, courseTitle, fileName);
   }
+
+  // 3. High-yield local algorithmic extraction
+  return generateLocalIntelligentSummary(textToAnalyze, courseTitle, fileName);
 }
 
 async function callGeminiAPI(

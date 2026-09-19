@@ -84,9 +84,26 @@ app.use((_req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
 
+// Production-hardened global error handler (never leaks stack traces in production)
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled server error:', err.message || err);
+  
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ message: 'Invalid or missing authorization token.' });
+  }
+
+  const isProd = process.env.NODE_ENV === 'production';
+  return res.status(err.status || 500).json({
+    message: isProd ? 'An unexpected server error occurred. Please try again.' : (err.message || 'Internal server error'),
+    ...(isProd ? {} : { stack: err.stack }),
+  });
+});
+
 // Start Server
 app.listen(PORT, () => {
-  console.log(`🚀 EduFlow Backend running at http://localhost:${PORT}`);
-  console.log(`🩺 Health check at http://localhost:${PORT}/healthz`);
+  const isProd = process.env.NODE_ENV === 'production';
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  console.log(`🚀 EduFlow Backend [${process.env.NODE_ENV || 'development'}] active on port ${PORT}`);
+  console.log(`🩺 Health check accessible at ${baseUrl}/healthz`);
   console.log(`🔒 Gemini AI Proxy active on /api/ai/summarize`);
 });

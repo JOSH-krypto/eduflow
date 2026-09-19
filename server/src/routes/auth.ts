@@ -1,12 +1,11 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import { validateBody, registerSchema, loginSchema } from '../middleware/validate.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'eduflow-secret-key-change-in-production-2026';
 
 const setAuthCookie = (res: Response, token: string) => {
@@ -116,7 +115,11 @@ router.post('/login', validateBody(loginSchema), async (req, res) => {
 
 // POST /api/auth/logout
 router.post('/logout', (_req, res) => {
-  res.clearCookie('eduflow_token');
+  res.clearCookie('eduflow_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
   return res.json({ message: 'Logged out successfully.' });
 });
 

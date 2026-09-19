@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import { validateBody, updateProfileSchema } from '../middleware/validate.js';
 import { storageService } from '../services/storage.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 

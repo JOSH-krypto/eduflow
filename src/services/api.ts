@@ -8,7 +8,11 @@ import {
   saveSessionLogs
 } from './storage';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '';
+const API_BASE_URL = 
+  (import.meta as any).env?.VITE_API_URL || 
+  ((import.meta as any).env?.PROD 
+    ? 'https://eduflow-el1u.onrender.com' 
+    : 'http://localhost:4000');
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

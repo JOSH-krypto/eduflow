@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db.js';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import { validateBody, createTaskSchema, updateTaskSchema } from '../middleware/validate.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // POST /api/tasks
 router.post('/', authMiddleware, validateBody(createTaskSchema), async (req: AuthRequest, res) => {
