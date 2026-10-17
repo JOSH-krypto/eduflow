@@ -126,12 +126,13 @@ export interface Course {
 }
 
 export interface UserPreferences {
-  preferredStudyDays: number[]; // [1, 2, 3, 4, 5]
-  preferredStudyTime: 'morning' | 'afternoon' | 'evening' | 'night';
-  streakReminders: boolean;
-  examCountdownAlerts: boolean;
-  newResourceAlerts: boolean;
-  accentColor: string; // hex or token
+  preferredStudyDays?: number[]; // [1, 2, 3, 4, 5]
+  preferredStudyTime?: 'morning' | 'afternoon' | 'evening' | 'night';
+  streakReminders?: boolean;
+  examCountdownAlerts?: boolean;
+  newResourceAlerts?: boolean;
+  accentColor?: string; // hex or token
+  themeMode?: 'light' | 'dark' | 'system';
 }
 
 export interface UserProfile {

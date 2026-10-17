@@ -19,35 +19,35 @@ export const QuickActionsSheet: React.FC<QuickActionsSheetProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end justify-center animate-fade-in font-sans select-none">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Bottom Sheet Card */}
       <div 
-        className="relative w-full max-w-md bg-white rounded-t-4xl border-t border-purple-100 shadow-sheet p-6 pb-8 z-10 animate-slide-up space-y-4"
+        className="relative w-full max-w-md bg-white dark:bg-[#1C1929] rounded-t-4xl border-t border-slate-200 dark:border-[#2E2A44] shadow-sheet p-6 pb-8 z-10 animate-slide-up space-y-4"
         role="dialog"
         aria-label="Quick Actions"
       >
         {/* Drag Pill Handle */}
-        <div className="w-12 h-1.5 rounded-full bg-zinc-200 mx-auto -mt-2 mb-3" />
+        <div className="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-[#2E2A44] mx-auto -mt-2 mb-3" />
 
         <div className="flex items-center justify-between pb-2">
           <div>
-            <h3 className="text-base font-bold text-[#1E1B4B] font-heading">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
               Quick Actions
             </h3>
-            <p className="text-xs text-zinc-400 font-sans">
+            <p className="text-xs text-slate-400 dark:text-slate-400 font-sans">
               Choose an action to log your study flow
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="p-1.5 rounded-full bg-slate-100 dark:bg-[#2E2A44] text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer"
             aria-label="Close quick actions"
           >
             <X className="w-4 h-4" />
@@ -62,16 +62,16 @@ export const QuickActionsSheet: React.FC<QuickActionsSheetProps> = ({
               onClose();
               onOpenAddTask();
             }}
-            className="w-full p-4 rounded-2xl bg-[#F8F7FC] hover:bg-[#F3E8FF] border border-purple-100/60 flex items-center gap-3.5 transition-all group text-left"
+            className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-[#13111C] hover:bg-slate-100 dark:hover:bg-[#252236] border border-slate-200/60 dark:border-[#2E2A44] flex items-center gap-3.5 transition-all group text-left cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#EDE9FE] text-[#7C3AED] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-slate-200/70 dark:bg-[#2E2A44] text-slate-800 dark:text-white flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <PlusCircle className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-bold text-[#1E1B4B] font-heading block group-hover:text-[#6D28D9]">
+              <span className="text-sm font-bold text-slate-900 dark:text-white font-heading block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                 Add Study Task
               </span>
-              <span className="text-xs text-zinc-500 font-sans">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
                 Schedule a lesson, lab, or quiz for today
               </span>
             </div>
@@ -83,38 +83,38 @@ export const QuickActionsSheet: React.FC<QuickActionsSheetProps> = ({
               onClose();
               onOpenFocusTimer();
             }}
-            className="w-full p-4 rounded-2xl bg-[#F8F7FC] hover:bg-[#FEF3C7] border border-amber-100/60 flex items-center gap-3.5 transition-all group text-left"
+            className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-[#13111C] hover:bg-teal-50/60 dark:hover:bg-teal-950/30 border border-slate-200/60 dark:border-[#2E2A44] flex items-center gap-3.5 transition-all group text-left cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <Timer className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-bold text-[#1E1B4B] font-heading block group-hover:text-[#B45309]">
+              <span className="text-sm font-bold text-slate-900 dark:text-white font-heading block group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">
                 Start Focus Session
               </span>
-              <span className="text-xs text-zinc-500 font-sans">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
                 Launch the Pomodoro timer & track streak
               </span>
             </div>
           </button>
 
-          {/* Action 3: Summarize research notes */}
+          {/* Action 3: AI Summarizer */}
           <button
             onClick={() => {
               onClose();
               onOpenAiSummarizer();
             }}
-            className="w-full p-4 rounded-2xl bg-[#F8F7FC] hover:bg-[#CCFBF1] border border-teal-100/60 flex items-center gap-3.5 transition-all group text-left"
+            className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-[#13111C] hover:bg-amber-50/60 dark:hover:bg-amber-950/30 border border-slate-200/60 dark:border-[#2E2A44] flex items-center gap-3.5 transition-all group text-left cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#CCFBF1] text-[#0D9488] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
               <Sparkles className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-bold text-[#1E1B4B] font-heading block group-hover:text-[#0F766E]">
-                Summarize Research Material
+              <span className="text-sm font-bold text-slate-900 dark:text-white font-heading block group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">
+                AI Research Notes
               </span>
-              <span className="text-xs text-zinc-500 font-sans">
-                Extract high-yield exam takeaways with AI
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+                Summarize study guides, slides & PDFs
               </span>
             </div>
           </button>
@@ -123,3 +123,5 @@ export const QuickActionsSheet: React.FC<QuickActionsSheetProps> = ({
     </div>
   );
 };
+
+export default QuickActionsSheet;

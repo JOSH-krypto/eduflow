@@ -58,148 +58,206 @@ export const CourseModal: React.FC<CourseModalProps> = ({
           nextVideo: {
             type: 'video',
             label: 'NEXT VIDEO',
-            title: `${title} High-Yield Overview`,
-            duration: '35 min',
+            title: `${title} Architecture Overview`,
+            duration: '18m',
           },
           upcomingLab: {
             type: 'lab',
-            label: 'UPCOMING LAB',
-            title: 'Initial Setup & Hands-on Sandbox',
-            duration: '45 min',
+            label: 'HANDS-ON LAB',
+            title: `Hands-on Sandbox Setup & Verification`,
+            duration: '35m',
           },
           subtopics: [
-            { id: `${courseId}-s1`, title: 'Domain Overview & Structure', durationMinutes: 30, completed: false, type: 'video' },
-            { id: `${courseId}-s2`, title: 'Core Terminology & High-Yield Specs', durationMinutes: 45, completed: false, type: 'reading' },
-            { id: `${courseId}-s3`, title: 'Foundational Sandbox Exercise', durationMinutes: 45, completed: false, type: 'lab' },
+            { id: `${courseId}-s1`, title: 'Core Architecture Overview & Mental Model', durationMinutes: 25, completed: false, type: 'video' },
+            { id: `${courseId}-s2`, title: 'High-Yield Domain Principles & Pitfalls', durationMinutes: 30, completed: false, type: 'reading' },
+            { id: `${courseId}-s3`, title: 'Hands-on Practice Sandbox Lab', durationMinutes: 45, completed: false, type: 'lab' },
+            { id: `${courseId}-s4`, title: 'Checkpoint Knowledge Quiz', durationMinutes: 15, completed: false, type: 'quiz' },
+          ],
+        },
+        {
+          id: `${courseId}-p2`,
+          phaseNumber: 2,
+          title: 'Advanced Implementation & Edge Cases',
+          description: `Deep dive into complex scenarios, performance optimization, and reliability principles.`,
+          status: 'locked',
+          dateRange: 'Week 4 – Week 6',
+          progressPercent: 0,
+          topicsCovered: ['Resilience', 'Cost Optimization', 'Troubleshooting', 'Automation'],
+          subtopics: [
+            { id: `${courseId}-s5`, title: 'Complex Trade-off Analysis & Patterns', durationMinutes: 35, completed: false, type: 'video' },
+            { id: `${courseId}-s6`, title: 'Hands-on Troubleshooting Scenarios', durationMinutes: 50, completed: false, type: 'lab' },
+          ],
+        },
+        {
+          id: `${courseId}-p3`,
+          phaseNumber: 3,
+          title: 'Exam Readiness & Timed Mock Exams',
+          description: `Full-length mock exam simulations, timed practice blocks, and weak-point remediation.`,
+          status: 'locked',
+          dateRange: 'Week 7 – Week 8',
+          progressPercent: 0,
+          topicsCovered: ['Full Mock Exams', 'Weak Spot Remediation', 'Speed Drills'],
+          subtopics: [
+            { id: `${courseId}-s7`, title: 'Timed Practice Exam (65 Questions)', durationMinutes: 90, completed: false, type: 'practice' },
+            { id: `${courseId}-s8`, title: 'Final High-Yield Review & Formula Sheet', durationMinutes: 30, completed: false, type: 'reading' },
           ],
         },
       ],
       agenda: [
         {
           id: `${courseId}-a1`,
-          title: `Start Module 1: ${title} Foundations`,
+          title: `${title} Architecture Overview`,
           type: 'video',
-          durationMinutes: 30,
+          durationMinutes: 25,
           status: 'current',
           progressPercent: 0,
+          phaseId: `${courseId}-p1`,
+        },
+        {
+          id: `${courseId}-a2`,
+          title: 'High-Yield Domain Principles & Pitfalls',
+          type: 'reading',
+          durationMinutes: 30,
+          status: 'locked',
+          progressPercent: 0,
+          phaseId: `${courseId}-p1`,
+        },
+        {
+          id: `${courseId}-a3`,
+          title: 'Hands-on Sandbox Setup & Verification',
+          type: 'lab',
+          durationMinutes: 45,
+          status: 'locked',
+          progressPercent: 0,
+          phaseId: `${courseId}-p1`,
         },
       ],
       resources: [],
       weeklyActivity: [
-        { day: 'Mon', shortDate: '09/07', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Tue', shortDate: '09/08', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Wed', shortDate: '09/09', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Thu', shortDate: '09/10', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Fri', shortDate: '09/11', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Sat', shortDate: '09/12', hours: 0, targetHours: 2.5, studied: false },
-        { day: 'Sun', shortDate: '09/13', hours: 0, targetHours: 2.5, studied: false },
+        { day: 'Mon', shortDate: 'M', hours: 0, targetHours: 3, studied: false },
+        { day: 'Tue', shortDate: 'T', hours: 0, targetHours: 3, studied: false },
+        { day: 'Wed', shortDate: 'W', hours: 0, targetHours: 3, studied: false },
+        { day: 'Thu', shortDate: 'T', hours: 0, targetHours: 3, studied: false },
+        { day: 'Fri', shortDate: 'F', hours: 0, targetHours: 3, studied: false },
+        { day: 'Sat', shortDate: 'S', hours: 0, targetHours: 3, studied: false },
+        { day: 'Sun', shortDate: 'S', hours: 0, targetHours: 3, studied: false },
       ],
       topicMastery: [
-        { topic: 'Core Concepts', masteryPercent: 0, totalQuestions: 20, correctQuestions: 0, category: 'study' },
-        { topic: 'Practical Implementation', masteryPercent: 0, totalQuestions: 20, correctQuestions: 0, category: 'lab' },
+        { topic: 'Core Architecture', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
+        { topic: 'High-Yield Principles', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
+        { topic: 'Hands-on Labs', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
       ],
     };
 
-    if (onCreateCourse) onCreateCourse(newCourse);
-    else if (onSaveCourse) onSaveCourse(newCourse);
-
+    if (onCreateCourse) {
+      onCreateCourse(newCourse);
+    } else if (onSaveCourse) {
+      onSaveCourse(newCourse);
+    }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in font-sans select-none">
       <div 
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-slide-up flex flex-col"
+        className="w-full max-w-md bg-white dark:bg-[#1C1929] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#2E2A44] overflow-hidden animate-slide-up flex flex-col"
         role="dialog"
-        aria-label="Course Management"
+        aria-label="Manage Study Tracks"
       >
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-violet-50/70 to-teal-50/40 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-5 bg-gradient-to-r from-violet-50/70 to-teal-50/40 dark:from-[#13111C] dark:to-[#1C1929] border-b border-slate-100 dark:border-[#2E2A44] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-violet-600 text-white flex items-center justify-center shadow-soft">
+            <div className="w-9 h-9 rounded-2xl bg-slate-900 dark:bg-[#2E2A44] text-amber-400 flex items-center justify-center shadow-soft">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-800">
-                {mode === 'switch' ? 'Select Exam Target' : 'Create Custom Track'}
+              <h2 className="text-sm font-bold text-slate-800 dark:text-white font-heading">
+                Study Tracks & Roadmaps
               </h2>
-              <p className="text-xs text-slate-500">
-                {mode === 'switch' ? 'Switch between your active study paths' : 'Set up a new certification timeline'}
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Switch active target or create a new curriculum roadmap
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/80 hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition shadow-sm"
+            className="w-8 h-8 rounded-full bg-white dark:bg-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#3B3759] text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition shadow-sm cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tab Toggle if courses exist */}
-        {courses.length > 0 && (
-          <div className="px-5 pt-3 pb-1 flex gap-2 border-b border-slate-100 bg-slate-50/60">
-            <button
-              onClick={() => setMode('switch')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                mode === 'switch'
-                  ? 'bg-white text-violet-700 shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <span>Active Paths ({courses.length})</span>
-            </button>
-            <button
-              onClick={() => setMode('create')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                mode === 'create'
-                  ? 'bg-white text-violet-700 shadow-sm border border-slate-200/60'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add New Target</span>
-            </button>
-          </div>
-        )}
+        {/* Tab Toggle */}
+        <div className="px-5 pt-3 pb-1 flex gap-2 border-b border-slate-100 dark:border-[#2E2A44] bg-slate-50/50 dark:bg-[#13111C]/50">
+          <button
+            onClick={() => setMode('switch')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              mode === 'switch'
+                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-[#3B3759]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
+          >
+            <span>My Tracks ({courses.length})</span>
+          </button>
+          <button
+            onClick={() => setMode('create')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              mode === 'create'
+                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-[#3B3759]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Study Plan</span>
+          </button>
+        </div>
 
         {/* Content */}
-        <div className="p-5 overflow-y-auto max-h-[70vh]">
+        <div className="p-5 max-h-[60vh] overflow-y-auto">
           {mode === 'switch' ? (
             <div className="space-y-2.5">
-              {courses.map((course) => {
-                const isActive = course.id === activeCourseId;
+              {courses.length === 0 && (
+                <div className="p-8 text-center text-slate-400 dark:text-slate-500 space-y-2">
+                  <p className="text-xs">No study tracks created yet.</p>
+                  <button
+                    onClick={() => setMode('create')}
+                    className="px-4 py-2 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                  >
+                    + Create Your First Plan
+                  </button>
+                </div>
+              )}
+              {courses.map((c) => {
+                const isActive = c.id === activeCourseId;
                 return (
                   <div
-                    key={course.id}
+                    key={c.id}
                     onClick={() => {
-                      if (onSelectCourse) onSelectCourse(course.id);
+                      if (onSelectCourse) onSelectCourse(c.id);
                       onClose();
                     }}
-                    className={`p-3.5 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
+                    className={`p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
                       isActive
-                        ? 'bg-violet-50/70 border-violet-300 shadow-soft'
-                        : 'bg-slate-50 hover:bg-slate-100 border-slate-100'
+                        ? 'bg-slate-100 dark:bg-[#2E2A44] border-slate-300 dark:border-[#3B3759] shadow-sm'
+                        : 'bg-slate-50 dark:bg-[#13111C] border-slate-100 dark:border-[#2E2A44] hover:bg-slate-100/70 dark:hover:bg-[#252236]'
                     }`}
                   >
-                    <div className="min-w-0 pr-3">
+                    <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-violet-100 text-violet-700">
-                          {course.code}
-                        </span>
-                        <span className="text-[11px] text-slate-400 font-medium">
-                          Exam: {course.examDate}
+                        <span className="text-xs font-bold text-slate-800 dark:text-white">{c.title}</span>
+                        <span className="px-2 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                          {c.code}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-slate-800 mt-1 truncate">
-                        {course.title}
-                      </h4>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-400">
+                        Exam: {c.examDate || 'No date set'} • {c.targetHoursPerWeek}h/wk target
+                      </p>
                     </div>
 
                     {isActive && (
-                      <div className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shrink-0">
                         <Check className="w-3.5 h-3.5" />
                       </div>
                     )}
@@ -210,7 +268,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Exam / Certification Title
                 </label>
                 <input
@@ -218,14 +276,14 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                   placeholder="e.g. Distributed Systems Architecture or AP Biology"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Exam Code
                   </label>
                   <input
@@ -233,19 +291,19 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                     placeholder="e.g. CS-401"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Target Exam Date
                   </label>
                   <input
                     type="date"
                     value={examDate}
                     onChange={(e) => setExamDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                     required
                   />
                 </div>
@@ -253,7 +311,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Category Domain
                   </label>
                   <input
@@ -262,7 +320,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                     placeholder="e.g. Computer Science, Medicine, Law"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                   <datalist id="category-domain-suggestions">
                     <option value="Computer Science" />
@@ -281,7 +339,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Weekly Goal (hrs)
                   </label>
                   <input
@@ -290,7 +348,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                     max="80"
                     value={targetHours}
                     onChange={(e) => setTargetHours(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -299,15 +357,15 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-2xl text-xs transition"
+                  className="flex-1 py-3 bg-slate-100 dark:bg-[#13111C] hover:bg-slate-200 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 font-semibold rounded-2xl text-xs transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl text-xs shadow-card transition flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white font-bold rounded-2xl text-xs shadow-card transition flex items-center justify-center gap-1.5 cursor-pointer ring-1 ring-white/10"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-amber-400" />
                   <span>Create Track</span>
                 </button>
               </div>
@@ -318,3 +376,5 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     </div>
   );
 };
+
+export default CourseModal;

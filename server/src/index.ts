@@ -15,6 +15,7 @@ import tasksRoutes from './routes/tasks.js';
 import sessionsRoutes from './routes/sessions.js';
 import summariesRoutes from './routes/summaries.js';
 import aiRoutes from './routes/ai.js';
+import newsRoutes from './routes/news.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -78,6 +79,7 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/sessions', sessionsRoutes);
 app.use('/api/summaries', summariesRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/news', newsRoutes);
 
 // Fallback 404 handler
 app.use((_req, res) => {

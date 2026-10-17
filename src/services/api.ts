@@ -57,58 +57,37 @@ class ApiService {
 
   // ================= AUTH =================
   async register(data: { email: string; password: string; name: string }): Promise<{ user: UserProfile }> {
-    try {
-      const res = await this.request<{ user: UserProfile }>('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-      saveUserProfile(res.user);
-      return res;
-    } catch (err) {
-      console.warn('Backend offline, using local profile registration:', err);
-      const profile: UserProfile = {
-        name: data.name,
-        email: data.email,
-        avatar: '',
-        planTier: 'Student',
-        activeCourseId: '',
-        totalHoursStudied: 0,
-        totalCertifications: 0,
-        weeklyTargetHours: 15,
-        preferences: {
-          preferredStudyDays: [1, 2, 3, 4, 5],
-          preferredStudyTime: 'morning',
-          streakReminders: true,
-          examCountdownAlerts: true,
-          newResourceAlerts: true,
-          accentColor: '#7C3AED',
-        },
-      };
-      saveUserProfile(profile);
-      return { user: profile };
-    }
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const res = await this.request<{ user: UserProfile }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: normalizedEmail,
+        password: data.password,
+        name: data.name.trim(),
+      }),
+    });
+    saveUserProfile(res.user);
+    return res;
   }
 
   async login(data: { email: string; password: string }): Promise<{ user: UserProfile }> {
-    try {
-      const res = await this.request<{ user: UserProfile }>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-      saveUserProfile(res.user);
-      return res;
-    } catch (err) {
-      console.warn('Backend offline, using local login:', err);
-      const profile = loadUserProfile();
-      return { user: profile };
-    }
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const res = await this.request<{ user: UserProfile }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: normalizedEmail,
+        password: data.password,
+      }),
+    });
+    saveUserProfile(res.user);
+    return res;
   }
 
   async logout(): Promise<void> {
     try {
       await this.request('/api/auth/logout', { method: 'POST' });
     } catch (err) {
-      console.warn('Logout fallback:', err);
+      console.warn('Logout network notice:', err);
     }
   }
 
@@ -119,9 +98,9 @@ class ApiService {
         saveUserProfile(res.user);
         return res.user;
       }
-      return loadUserProfile();
+      return null;
     } catch {
-      return loadUserProfile();
+      return null;
     }
   }
 
@@ -213,21 +192,38 @@ class ApiService {
   }
 
   // ================= TASKS =================
-  async createTask(task: Omit<AgendaTask, 'id'> & { courseId?: string }): Promise<AgendaTask> {
+  async createTask(
+    task: Partial<AgendaTask> & { title: string; type: AgendaTask['type']; durationMinutes: number; courseId?: string }
+  ): Promise<AgendaTask> {
     try {
       const res = await this.request<{ task: AgendaTask }>('/api/tasks', {
         method: 'POST',
-        body: JSON.stringify(task),
+        body: JSON.stringify({
+          status: 'current',
+          progressPercent: 0,
+          ...task,
+        }),
       });
       return res.task;
     } catch {
       const newTask: AgendaTask = {
+        status: 'current',
+        progressPercent: 0,
         ...task,
         id: `task-${Date.now()}`,
-        status: task.status || 'current',
-        progressPercent: 0,
       };
       return newTask;
+    }
+  }
+
+  async updateTask(taskId: string, updates: Partial<AgendaTask>): Promise<void> {
+    try {
+      await this.request(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    } catch (err) {
+      console.warn('Backend updateTask fallback:', err);
     }
   }
 
@@ -250,50 +246,115 @@ class ApiService {
     }
   }
 
+  async logStudySession(session: Omit<StudySessionLog, 'id'>): Promise<StudySessionLog> {
+    return this.logSession(session);
+  }
+
   // ================= AI RESEARCH SUMMARIZER (SERVER-SIDE PROXY) =================
   /**
    * The Gemini API key lives ONLY on the backend.
    * Frontend calls our own server endpoint `/api/ai/summarize`.
    */
+  async summarizeDocument(params: {
+    file?: File;
+    materialText?: string;
+    title?: string;
+    courseId?: string;
+    focusArea?: string;
+  }): Promise<ResearchSummary> {
+    return this.summarizeResearchMaterial(params);
+  }
   async summarizeResearchMaterial(
-    materialText: string,
-    title?: string,
-    courseId?: string
+    input: string | { file?: File; materialText?: string; title?: string; courseId?: string; focusArea?: string },
+    legacyTitle?: string,
+    legacyCourseId?: string
   ): Promise<ResearchSummary> {
-    try {
+    let file: File | undefined;
+    let materialText: string | undefined;
+    let title: string | undefined;
+    let courseId: string | undefined;
+    let focusArea: string | undefined;
+
+    if (typeof input === 'string') {
+      materialText = input;
+      title = legacyTitle;
+      courseId = legacyCourseId;
+    } else {
+      file = input.file;
+      materialText = input.materialText;
+      title = input.title;
+      courseId = input.courseId;
+      focusArea = input.focusArea;
+    }
+
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File exceeds maximum size of 10 MB. Please upload a smaller document.');
+      }
+
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        const headerBuffer = await file.slice(0, 5).arrayBuffer();
+        const headerStr = new TextDecoder('ascii').decode(headerBuffer);
+        if (!headerStr.startsWith('%PDF-')) {
+          throw new Error('Corrupted or invalid PDF. Document is missing %PDF- header magic bytes.');
+        }
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      if (title) formData.append('title', title);
+      if (courseId) formData.append('courseId', courseId);
+      if (focusArea) formData.append('customPromptFocus', focusArea);
+
       const res = await this.request<{ summary: ResearchSummary }>('/api/ai/summarize', {
         method: 'POST',
-        body: JSON.stringify({ materialText, title, courseId }),
+        body: formData,
       });
       return res.summary;
-    } catch (err: any) {
-      console.warn('Backend AI proxy error or offline, generating structured summary:', err);
-      const lines = materialText.split('\n').map((l) => l.trim()).filter(Boolean);
-      const words = materialText.split(/\s+/).filter(Boolean);
-      const firstLine = lines[0] ? lines[0].replace(/^#+\s*/, '').substring(0, 50) : 'Study Summary';
-
-      return {
-        id: `summary-${Date.now()}`,
-        title: title || firstLine || 'Study Material Breakdown',
-        originalText: materialText,
-        overview: `Executive summary covering ${words.length} words of study material. Synthesizes key concepts and exam preparation objectives.`,
-        keyConcepts: lines.slice(0, 4).map((line, idx) => ({
-          concept: `Key Concept ${idx + 1}`,
-          definition: line.length > 120 ? line.substring(0, 120) + '...' : line,
-        })),
-        examHighYield: [
-          'Review foundational definitions and terminology in this topic.',
-          'Focus on edge cases, limits, and high-frequency problem scenarios.',
-          'Practice explaining core concepts in your own words before your exam date.'
-        ],
-        wordCount: words.length,
-        estimatedStudyTimeMinutes: Math.max(10, Math.round(words.length / 100) * 5),
-        createdAt: new Date().toISOString(),
-        courseId,
-        tags: ['StudyNotes', 'ExamPrep'],
-      };
     }
+
+    if (!materialText || !materialText.trim()) {
+      throw new Error('Please enter study notes or upload a document to summarize.');
+    }
+
+    const res = await this.request<{ summary: ResearchSummary }>('/api/ai/summarize', {
+      method: 'POST',
+      body: JSON.stringify({ materialText, title, courseId, customPromptFocus: focusArea }),
+    });
+    return res.summary;
   }
+
+  async getNews(params?: { category?: string; search?: string; page?: number; limit?: number }): Promise<NewsResponse> {
+    const query = new URLSearchParams();
+    if (params?.category) query.set('category', params.category);
+    if (params?.search) query.set('search', params.search);
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+
+    const qs = query.toString();
+    return this.request<NewsResponse>(`/api/news${qs ? `?${qs}` : ''}`);
+  }
+}
+
+export interface NewsItemDto {
+  id: string;
+  title: string;
+  excerpt: string;
+  url: string;
+  source: string;
+  category: string;
+  imageUrl?: string | null;
+  publishedAt: string;
+}
+
+export interface NewsResponse {
+  items: NewsItemDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  lastUpdated: string;
+  categories: string[];
 }
 
 export const api = new ApiService();

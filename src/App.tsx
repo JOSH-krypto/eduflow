@@ -26,7 +26,7 @@ import {
 } from './services/storage';
 import { fireCelebrationConfetti, fireSmallBurst } from './services/confetti';
 import { api } from './services/api';
-import { applyTheme } from './utils/theme';
+import { applyTheme, ThemeMode, getStoredThemeMode, setStoredThemeMode } from './utils/theme';
 import { SAMPLE_AWS_COURSE_TEMPLATE } from './data/sampleCourseTemplate';
 
 // Layout Components
@@ -45,6 +45,7 @@ import { QuickActionsSheet } from './components/modals/QuickActionsSheet';
 import { AddTaskModal } from './components/modals/AddTaskModal';
 import { FocusTimerModal } from './components/modals/FocusTimerModal';
 import { ResearchSummarizerModal } from './components/research/ResearchSummarizerModal';
+import { AcademicNewsModal } from './components/news/AcademicNewsModal';
 import { PhaseDetailModal } from './components/modals/PhaseDetailModal';
 import { CourseModal } from './components/modals/CourseModal';
 import { AuthModal } from './components/auth/AuthModal';
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(getStoredThemeMode());
 
   // Floating Toast
   const [toast, setToast] = useState<ToastData | null>(null);
@@ -69,6 +71,8 @@ export const App: React.FC = () => {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState<boolean>(false);
   const [isFocusTimerOpen, setIsFocusTimerOpen] = useState<boolean>(false);
   const [isAiSummarizerOpen, setIsAiSummarizerOpen] = useState<boolean>(false);
+  const [isAcademicNewsModalOpen, setIsAcademicNewsModalOpen] = useState<boolean>(false);
+  const [academicNewsCategory, setAcademicNewsCategory] = useState<string>('All');
   const [isCourseModalOpen, setIsCourseModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [selectedPhaseForDetail, setSelectedPhaseForDetail] = useState<Phase | null>(null);
@@ -97,6 +101,36 @@ export const App: React.FC = () => {
     }, 4000);
   };
 
+  // Handle Theme Change
+  const handleThemeModeChange = (newMode: ThemeMode) => {
+    setThemeModeState(newMode);
+    setStoredThemeMode(newMode);
+    applyTheme(userProfile.preferences?.accentColor, newMode);
+    setUserProfile((prev) => ({
+      ...prev,
+      preferences: {
+        ...prev.preferences!,
+        themeMode: newMode,
+      },
+    }));
+    if (isBackendConnected) {
+      api
+        .updateProfile({
+          preferences: {
+            preferredStudyDays: [1, 2, 3, 4, 5],
+            preferredStudyTime: 'evening',
+            streakReminders: true,
+            examCountdownAlerts: true,
+            newResourceAlerts: false,
+            accentColor: '#8B5CF6',
+            ...userProfile.preferences,
+            themeMode: newMode,
+          },
+        })
+        .catch(() => {});
+    }
+  };
+
   // Initial Load from Storage and check backend health
   useEffect(() => {
     const loadedCourses = loadCourses();
@@ -112,7 +146,9 @@ export const App: React.FC = () => {
     setUserProfile(loadedProfile);
 
     // Apply active theme tokens
-    applyTheme(loadedProfile.preferences?.accentColor);
+    const initialMode = loadedProfile.preferences?.themeMode || getStoredThemeMode();
+    setThemeModeState(initialMode);
+    applyTheme(loadedProfile.preferences?.accentColor, initialMode);
 
     // Test backend connection and synchronize authenticated session
     api.healthCheck().then((healthy: boolean) => {
@@ -121,6 +157,11 @@ export const App: React.FC = () => {
         api.getMe().then((me) => {
           if (me && me.email) {
             setUserProfile(me);
+            if (me.preferences?.themeMode) {
+              setThemeModeState(me.preferences.themeMode);
+              setStoredThemeMode(me.preferences.themeMode);
+              applyTheme(me.preferences?.accentColor, me.preferences.themeMode);
+            }
             api.getCourses().then((serverCourses) => {
               if (serverCourses) {
                 setCourses(serverCourses);
@@ -144,9 +185,9 @@ export const App: React.FC = () => {
   useEffect(() => {
     saveUserProfile(userProfile);
     if (userProfile.preferences?.accentColor) {
-      applyTheme(userProfile.preferences.accentColor);
+      applyTheme(userProfile.preferences.accentColor, themeMode);
     }
-  }, [userProfile]);
+  }, [userProfile, themeMode]);
 
   useEffect(() => {
     saveNotifications(notifications);
@@ -178,107 +219,86 @@ export const App: React.FC = () => {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    await api.deleteCourse(courseId);
+    const courseToDelete = courses.find((c) => c.id === courseId);
     const updated = courses.filter((c) => c.id !== courseId);
     setCourses(updated);
+
     if (activeCourseId === courseId) {
-      const nextId = updated[0]?.id || '';
-      setActiveCourseIdState(nextId);
-      setActiveCourseId(nextId);
+      const nextActiveId = updated[0]?.id || '';
+      setActiveCourseIdState(nextActiveId);
+      setActiveCourseId(nextActiveId);
     }
-    triggerToast('Course Removed', 'Study plan track removed successfully.', 'info');
-  };
 
-  const handleSignOut = async () => {
-    try {
-      await api.logout();
-    } catch (err) {
-      console.warn('Logout fallback:', err);
+    if (isBackendConnected) {
+      try {
+        await api.deleteCourse(courseId);
+      } catch (e) {
+        console.warn('Backend delete course sync error:', e);
+      }
     }
-    clearUserData();
-    setUserProfile(defaultUserProfile);
-    setCourses([]);
-    setActiveCourseIdState('');
-    setIsAuthModalOpen(true);
-    triggerToast('Signed Out', 'You have been signed out successfully.', 'info');
+
+    triggerToast(
+      'Track Deleted',
+      `"${courseToDelete?.title || 'Course'}" removed from your study tracks.`,
+      'info'
+    );
   };
 
-  const handleUpdateProfile = (updated: UserProfile) => {
-    setUserProfile(updated);
-    triggerToast('Profile Updated', 'Your settings and study preferences have been saved.', 'success');
-  };
-
-  // Toggle Task Completion
-  const handleToggleTask = (taskId: string) => {
+  // Toggle Agenda Task status
+  const handleToggleTask = async (taskId: string) => {
     if (!activeCourse) return;
 
     let justCompleted = false;
-    const updatedAgenda = (activeCourse.agenda || []).map((task) => {
+    let completedTitle = '';
+
+    const updatedAgenda = activeCourse.agenda.map((task) => {
       if (task.id === taskId) {
-        const newStatus = task.status === 'completed' ? 'current' : 'completed';
-        if (newStatus === 'completed') {
+        const nextStatus = task.status === 'completed' ? 'current' : 'completed';
+        if (nextStatus === 'completed') {
           justCompleted = true;
+          completedTitle = task.title;
         }
         return {
           ...task,
-          status: newStatus as any,
-          progressPercent: newStatus === 'completed' ? 100 : 0,
-          completedAt: newStatus === 'completed' ? new Date().toISOString() : undefined,
+          status: nextStatus as any,
+          progressPercent: nextStatus === 'completed' ? 100 : 0,
         };
       }
       return task;
     });
 
-    const updatedPhases = recalculatePhaseProgress(activeCourse.phases || [], updatedAgenda);
+    const updatedPhases = recalculatePhaseProgress(activeCourse.phases, updatedAgenda);
 
     const updatedCourse: Course = {
       ...activeCourse,
       agenda: updatedAgenda,
       phases: updatedPhases,
-      completedSessionsToday: justCompleted
-        ? (activeCourse.completedSessionsToday || 0) + 1
-        : Math.max(0, (activeCourse.completedSessionsToday || 0) - 1),
     };
 
-    const updatedCourses = courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c));
-    setCourses(updatedCourses);
+    const newCourses = courses.map((c) => (c.id === activeCourse.id ? updatedCourse : c));
+    setCourses(newCourses);
 
     if (justCompleted) {
       fireSmallBurst();
-      triggerToast('Task Completed! 🎉', 'Streak maintained. Keep up the momentum!', 'success');
+      triggerToast('Task Completed! 🎉', `"${completedTitle}" marked done!`, 'success');
+    }
+
+    if (isBackendConnected) {
+      try {
+        const taskToUpdate = updatedAgenda.find((t) => t.id === taskId);
+        if (taskToUpdate) {
+          await api.updateTask(taskId, {
+            status: taskToUpdate.status,
+            progressPercent: taskToUpdate.progressPercent,
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to sync task toggle to backend:', err);
+      }
     }
   };
 
-  // Add Task to Agenda
-  const handleAddTask = (newTaskData: Omit<AgendaTask, 'id' | 'status'>) => {
-    if (!activeCourse) {
-      triggerToast('Create a Plan First', 'Please create a study course before scheduling tasks.', 'info');
-      setIsCourseModalOpen(true);
-      return;
-    }
-
-    const newTask: AgendaTask = {
-      ...newTaskData,
-      id: `task-${Date.now()}`,
-      status: 'current',
-      progressPercent: 0,
-    };
-
-    const updatedAgenda = [newTask, ...(activeCourse.agenda || [])];
-    const updatedPhases = recalculatePhaseProgress(activeCourse.phases || [], updatedAgenda);
-
-    const updatedCourse: Course = {
-      ...activeCourse,
-      agenda: updatedAgenda,
-      phases: updatedPhases,
-    };
-
-    const updatedCourses = courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c));
-    setCourses(updatedCourses);
-    triggerToast('Task Scheduled', `"${newTask.title}" added to today's focus plan.`, 'success');
-  };
-
-  // Start Focus Session for a Task
+  // Start Focus session from Agenda task
   const handleStartFocusSession = (task: AgendaTask) => {
     setFocusSessionData({
       title: task.title,
@@ -289,61 +309,129 @@ export const App: React.FC = () => {
     setIsFocusTimerOpen(true);
   };
 
-  // Start Focus Topic from Plan Tab
-  const handleStartPlanTopic = (title: string, _phase: Phase, subtopic?: SubTopic) => {
+  // Start study topic from Plan Roadmap
+  const handleStartPlanTopic = (topicName: string, phase: Phase, subtopic?: SubTopic) => {
     setFocusSessionData({
-      title,
-      type: subtopic?.type || 'video',
-      duration: subtopic?.durationMinutes || 30,
+      title: `${phase.title}: ${topicName}`,
+      type: (subtopic?.type as TaskType) || 'reading',
+      duration: subtopic?.durationMinutes || 25,
       taskId: subtopic?.id,
     });
     setIsFocusTimerOpen(true);
   };
 
-  // Focus Session Completed
-  const handleCompleteFocusSession = (durationMinutes: number, _taskTitle: string) => {
-    if (!activeCourse) return;
+  // Complete a focus timer block
+  const handleCompleteFocusSession = async (log: any) => {
+    if (activeCourse) {
+      const updatedCourse: Course = {
+        ...activeCourse,
+        studiedHoursThisWeek: Number(
+          ((activeCourse.studiedHoursThisWeek || 0) + log.durationMinutes / 60).toFixed(1)
+        ),
+      };
 
-    const addedHours = Math.round((durationMinutes / 60) * 10) / 10;
-    const updatedCourse: Course = {
-      ...activeCourse,
-      studiedHoursThisWeek: Math.round(((activeCourse.studiedHoursThisWeek || 0) + addedHours) * 10) / 10,
-      completedSessionsToday: (activeCourse.completedSessionsToday || 0) + 1,
-    };
+      if (focusSessionData.taskId) {
+        updatedCourse.agenda = updatedCourse.agenda.map((t) =>
+          t.id === focusSessionData.taskId
+            ? { ...t, status: 'completed' as const, progressPercent: 100 }
+            : t
+        );
+        updatedCourse.phases = recalculatePhaseProgress(
+          updatedCourse.phases,
+          updatedCourse.agenda
+        );
+      }
 
-    if (focusSessionData.taskId) {
-      updatedCourse.agenda = (updatedCourse.agenda || []).map((t) =>
-        t.id === focusSessionData.taskId
-          ? { ...t, status: 'completed', progressPercent: 100 }
-          : t
-      );
-      updatedCourse.phases = recalculatePhaseProgress(updatedCourse.phases || [], updatedCourse.agenda);
+      setCourses(courses.map((c) => (c.id === activeCourse.id ? updatedCourse : c)));
     }
 
-    const updatedCourses = courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c));
-    setCourses(updatedCourses);
-
-    setUserProfile((prev) => ({
-      ...prev,
-      totalHoursStudied: Math.round(((prev.totalHoursStudied || 0) + addedHours) * 10) / 10,
-    }));
+    if (isBackendConnected) {
+      try {
+        await api.logStudySession({
+          courseId: activeCourse?.id || 'default',
+          taskTitle: log.taskTitle,
+          taskType: log.taskType,
+          durationMinutes: log.durationMinutes,
+          completedAt: new Date().toISOString(),
+          notes: log.notes,
+        });
+      } catch (err) {
+        console.warn('Backend sync session failed:', err);
+      }
+    }
 
     fireCelebrationConfetti();
-    triggerToast('Session Logged! 🚀', `+${durationMinutes} mins recorded toward your weekly goal.`, 'success');
+    triggerToast(
+      'Focus Block Logged! 🔥',
+      `Studied ${log.durationMinutes}m on "${log.taskTitle}". Keep up the momentum!`,
+      'success'
+    );
   };
 
-  // Add Summary to Library
+  // Add a new task to agenda
+  const handleAddTask = async (newTaskData: Omit<AgendaTask, 'id' | 'status'>) => {
+    if (!activeCourse) return;
+
+    const newTask: AgendaTask = {
+      ...newTaskData,
+      id: `task-${Date.now()}`,
+      status: 'current',
+      progressPercent: 0,
+    };
+
+    const updatedCourse: Course = {
+      ...activeCourse,
+      agenda: [newTask, ...activeCourse.agenda],
+    };
+
+    setCourses(courses.map((c) => (c.id === activeCourse.id ? updatedCourse : c)));
+    triggerToast('Task Added', `"${newTask.title}" added to your focus plan!`, 'success');
+
+    if (isBackendConnected) {
+      try {
+        await api.createTask({
+          title: newTask.title,
+          type: newTask.type,
+          durationMinutes: newTask.durationMinutes,
+          phaseId: newTask.phaseId,
+        });
+      } catch (err) {
+        console.warn('Backend sync create task failed:', err);
+      }
+    }
+  };
+
+  // Save AI Research Summary
   const handleSaveSummary = (summary: ResearchSummary) => {
     const updated = addResearchSummary(summary);
     setSummaries(updated);
-    triggerToast('Summary Saved', `"${summary.title}" added to your research library.`, 'success');
+    triggerToast('Summary Saved', `"${summary.title}" stored to your research notebook.`, 'success');
   };
 
-  // Notifications
+  // Update profile
+  const handleUpdateProfile = (updated: UserProfile) => {
+    setUserProfile(updated);
+    triggerToast('Profile Updated', 'Your settings and appearance preferences were saved.', 'success');
+  };
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    try {
+      await api.logout();
+    } catch {}
+    clearUserData();
+    setUserProfile(defaultUserProfile);
+    setCourses([]);
+    setActiveCourseIdState('');
+    setActiveTab('home');
+    setIsAuthModalOpen(true);
+    triggerToast('Signed Out', 'You have been safely signed out. Sign in anytime to restore your account.', 'info');
+  };
+
+  // Notifications Handlers
   const handleMarkAllNotifsRead = () => {
     const updated = notifications.map((n) => ({ ...n, read: true }));
     setNotifications(updated);
-    triggerToast('All Read', 'Notifications cleared.', 'info');
   };
 
   const handleSelectNotification = (item: NotificationItem) => {
@@ -355,7 +443,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-slate-900 font-sans antialiased selection:bg-amber-100 selection:text-amber-900 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#13111C] text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-amber-100 dark:selection:bg-amber-950 selection:text-amber-900 dark:selection:text-amber-200 flex flex-col md:flex-row transition-colors">
       {/* Tablet Slim Rail & Desktop Persistent Sidebar */}
       <NavigationSidebar
         activeTab={activeTab}
@@ -369,6 +457,10 @@ export const App: React.FC = () => {
         }}
         onOpenFocusTimer={() => setIsFocusTimerOpen(true)}
         onOpenAiSummarizer={() => setIsAiSummarizerOpen(true)}
+        onOpenAcademicNews={() => {
+          setAcademicNewsCategory('All');
+          setIsAcademicNewsModalOpen(true);
+        }}
         userProfile={userProfile}
         course={activeCourse}
         isBackendConnected={isBackendConnected}
@@ -391,6 +483,8 @@ export const App: React.FC = () => {
           onSelectNotification={handleSelectNotification}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          themeMode={themeMode}
+          onThemeModeChange={handleThemeModeChange}
         />
 
         {/* Tab Views Content */}
@@ -405,6 +499,10 @@ export const App: React.FC = () => {
               onOpenQuickActions={() => setIsQuickActionsOpen(true)}
               onOpenCreateCourse={() => setIsCourseModalOpen(true)}
               onLoadSampleTemplate={handleLoadSampleTemplate}
+              onOpenFullNews={(initialCat) => {
+                setAcademicNewsCategory(initialCat || 'All');
+                setIsAcademicNewsModalOpen(true);
+              }}
               searchFilter={searchQuery}
             />
           )}
@@ -432,6 +530,8 @@ export const App: React.FC = () => {
               onUpdateProfile={handleUpdateProfile}
               onSignOut={handleSignOut}
               isBackendConnected={isBackendConnected}
+              themeMode={themeMode}
+              onThemeModeChange={handleThemeModeChange}
             />
           )}
         </main>
@@ -499,6 +599,13 @@ export const App: React.FC = () => {
         onAddTaskToAgenda={handleAddTask}
       />
 
+      {/* Academic News Modal */}
+      <AcademicNewsModal
+        isOpen={isAcademicNewsModalOpen}
+        onClose={() => setIsAcademicNewsModalOpen(false)}
+        initialCategory={academicNewsCategory}
+      />
+
       {/* Phase Detail Modal */}
       {selectedPhaseForDetail && (
         <PhaseDetailModal
@@ -534,6 +641,11 @@ export const App: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={(user) => {
           setUserProfile(user);
+          if (user.preferences?.themeMode) {
+            setThemeModeState(user.preferences.themeMode);
+            setStoredThemeMode(user.preferences.themeMode);
+            applyTheme(user.preferences?.accentColor, user.preferences.themeMode);
+          }
           setIsAuthModalOpen(false);
           api.getCourses().then((serverCourses) => {
             const list = serverCourses || [];

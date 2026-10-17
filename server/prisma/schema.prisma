@@ -122,3 +122,20 @@ model ResearchSummary {
   user                      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   course                    Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
 }
+
+model NewsItem {
+  id          String   @id @default(uuid())
+  title       String
+  excerpt     String   @db.Text
+  url         String   @unique
+  source      String
+  category    String   // Top stories, Latest, Science, Technology, Health & Medicine, Humanities, Arts, Social Sciences, Education
+  imageUrl    String?
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([category])
+  @@index([publishedAt])
+}
+

@@ -106,6 +106,7 @@ CREATE TABLE "ResearchSummary" (
     "estimatedStudyTimeMinutes" INTEGER NOT NULL DEFAULT 15,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ResearchSummary_pkey" PRIMARY KEY ("id")
 );
@@ -133,3 +134,24 @@ ALTER TABLE "ResearchSummary" ADD CONSTRAINT "ResearchSummary_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "ResearchSummary" ADD CONSTRAINT "ResearchSummary_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- CreateTable
+CREATE TABLE "NewsItem" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "excerpt" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "source" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "imageUrl" TEXT,
+    "publishedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "NewsItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "NewsItem_url_key" ON "NewsItem"("url");
+CREATE INDEX "NewsItem_category_idx" ON "NewsItem"("category");
+CREATE INDEX "NewsItem_publishedAt_idx" ON "NewsItem"("publishedAt");

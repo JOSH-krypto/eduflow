@@ -80,6 +80,31 @@ body {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
+.dark body {
+  background-color: #13111C !important;
+  background-image: none !important;
+  color: #F3F2F8 !important;
+}
+
+.dark input, .dark textarea, .dark select {
+  color-scheme: dark;
+}
+
+/* Recharts Dark Theme Tokens */
+.dark .recharts-cartesian-grid line {
+  stroke: #2E2A44 !important;
+}
+.dark .recharts-text {
+  fill: #A19DB8 !important;
+}
+.dark .recharts-default-tooltip {
+  background-color: #1C1929 !important;
+  border-color: #2E2A44 !important;
+  color: #F3F2F8 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: -0.024em;
@@ -99,6 +124,17 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
 }
 
+.dark .kaggle-card {
+  background-color: #1C1929 !important;
+  border-color: #2E2A44 !important;
+  color: #F3F2F8 !important;
+}
+
+.dark .kaggle-card:hover {
+  border-color: #3F3A5C !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.35) !important;
+}
+
 /* Kaggle Pill Segmented Control */
 .kaggle-pill-active {
   background-color: #18181B;
@@ -106,6 +142,11 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 9999px;
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.dark .kaggle-pill-active {
+  background-color: #F3F2F8 !important;
+  color: #13111C !important;
 }
 
 .kaggle-pill-inactive {
@@ -119,6 +160,15 @@ h1, h2, h3, h4, h5, h6 {
 .kaggle-pill-inactive:hover {
   color: #18181B;
   background-color: #F1F5F9;
+}
+
+.dark .kaggle-pill-inactive {
+  color: #A19DB8 !important;
+}
+
+.dark .kaggle-pill-inactive:hover {
+  color: #F3F2F8 !important;
+  background-color: #262338 !important;
 }
 
 /* Kaggle Floating Hover Popover */
@@ -145,6 +195,14 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(100, 116, 139, 0.45);
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(161, 157, 184, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 157, 184, 0.45);
+}
+
 /* Soft White Card Utility */
 .eduflow-card {
   background-color: #FFFFFF;
@@ -159,12 +217,28 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
 }
 
+.dark .eduflow-card {
+  background-color: #1C1929 !important;
+  border-color: #2E2A44 !important;
+  color: #F3F2F8 !important;
+}
+
+.dark .eduflow-card:hover {
+  border-color: #3F3A5C !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.35) !important;
+}
+
 /* Glass panel */
 .glass-panel {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid #E2E8F0;
+}
+
+.dark .glass-panel {
+  background: rgba(28, 25, 41, 0.92) !important;
+  border-color: #2E2A44 !important;
 }
 
 /* Pill segmented control active */

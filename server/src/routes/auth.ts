@@ -26,17 +26,19 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
       return res.status(400).json({ message: 'Name, email, and password are required.' });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
+      console.warn(`[AUTH] Registration conflict: email "${normalizedEmail}" already exists`);
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         passwordHash,
-        name,
+        name: name.trim(),
         planTier: 'Student',
         weeklyTargetHours: 15,
         preferences: {
@@ -46,10 +48,12 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
           examCountdownAlerts: true,
           newResourceAlerts: true,
           accentColor: '#7C3AED',
+          themeMode: 'system',
         },
       },
     });
 
+    console.info(`[AUTH] User registered successfully: id=${user.id} email="${normalizedEmail}"`);
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
     setAuthCookie(res, token);
 
@@ -67,7 +71,7 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
       },
     });
   } catch (err: any) {
-    console.error('Registration error:', err);
+    console.error('[AUTH] Registration error:', err);
     return res.status(500).json({ message: 'Registration failed. Please try again.' });
   }
 });
@@ -81,16 +85,20 @@ router.post('/login', validateBody(loginSchema), async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      console.warn(`[AUTH] Login failed: User not found for email "${normalizedEmail}"`);
+      return res.status(401).json({ message: 'Email or password is incorrect.' });
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
+      console.warn(`[AUTH] Login failed: Password mismatch for user id=${user.id} email="${normalizedEmail}"`);
+      return res.status(401).json({ message: 'Email or password is incorrect.' });
     }
 
+    console.info(`[AUTH] User signed in successfully: id=${user.id} email="${normalizedEmail}"`);
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
     setAuthCookie(res, token);
 
@@ -108,7 +116,7 @@ router.post('/login', validateBody(loginSchema), async (req, res) => {
       },
     });
   } catch (err: any) {
-    console.error('Login error:', err);
+    console.error('[AUTH] Login error:', err);
     return res.status(500).json({ message: 'Login failed. Please try again.' });
   }
 });

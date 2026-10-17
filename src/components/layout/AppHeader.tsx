@@ -4,6 +4,8 @@ import { UserProfile, Course, NotificationItem } from '../../types/eduflow';
 import { InitialsAvatar } from '../common/InitialsAvatar';
 import { getDaysUntilExam } from '../../utils/dateUtils';
 import { NotificationPanel } from '../modals/NotificationPanel';
+import { ThemeModeToggle } from '../common/ThemeModeToggle';
+import { ThemeMode } from '../../utils/theme';
 
 interface AppHeaderProps {
   userProfile: UserProfile;
@@ -19,6 +21,8 @@ interface AppHeaderProps {
   onSelectNotification: (item: NotificationItem) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  themeMode?: ThemeMode;
+  onThemeModeChange?: (mode: ThemeMode) => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -35,6 +39,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onSelectNotification,
   searchQuery = '',
   onSearchChange,
+  themeMode = 'system',
+  onThemeModeChange,
 }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isCoursePickerOpen, setIsCoursePickerOpen] = useState(false);
@@ -55,7 +61,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const unreadNotifs = notifications.filter((n) => !n.read).length;
 
   return (
-    <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3 border-b border-slate-200/80 w-full transition-all font-sans select-none">
+    <header className="sticky top-0 z-20 bg-white/95 dark:bg-[#13111C]/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3 border-b border-slate-200/80 dark:border-[#2E2A44] w-full transition-colors font-sans select-none">
       <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-6">
         {/* Left: User Avatar + Name Greeting */}
         <div 
@@ -69,14 +75,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             name={userProfile.name || 'Student'}
             avatarUrl={userProfile.avatar}
             size="md"
-            className="ring-2 ring-slate-100 group-hover:ring-slate-900 transition-all shadow-sm"
+            className="ring-2 ring-slate-100 dark:ring-[#2E2A44] group-hover:ring-slate-900 dark:group-hover:ring-slate-400 transition-all shadow-sm"
           />
 
           <div className="min-w-0">
-            <span className="text-[11px] text-slate-400 font-medium block leading-none">
+            <span className="text-[11px] text-slate-400 dark:text-slate-400 font-medium block leading-none">
               Welcome back,
             </span>
-            <span className="text-sm sm:text-base font-bold text-slate-900 truncate block mt-0.5 group-hover:text-amber-600 transition-colors">
+            <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate block mt-0.5 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
               {userProfile.name || 'Student'}
             </span>
           </div>
@@ -91,13 +97,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search benchmarks, modules, tasks, research papers..."
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white border border-slate-200/90 rounded-full text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 shadow-sm transition-all"
+                placeholder="Search modules, tasks, research papers, news..."
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-[#1C1929] hover:bg-white dark:hover:bg-[#252236] border border-slate-200/90 dark:border-[#2E2A44] rounded-full text-xs font-medium text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-[#1C1929] focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-400 dark:focus:border-[#3B3759] shadow-sm transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => onSearchChange('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-100 text-slate-400 cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-[#2E2A44] text-slate-400 cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X className="w-3 h-3" />
@@ -107,14 +113,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
         )}
 
-        {/* Right: Course / Streak Pill + Notification Bell */}
+        {/* Right: Theme Toggle + Course Switcher + Notification Bell */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Top Bar Theme Toggle */}
+          {onThemeModeChange && (
+            <div className="hidden sm:block">
+              <ThemeModeToggle
+                currentMode={themeMode}
+                onChange={onThemeModeChange}
+                size="sm"
+              />
+            </div>
+          )}
+
           {/* Course Switcher / Countdown Pill */}
           <div className="relative">
             {course ? (
               <button
                 onClick={() => setIsCoursePickerOpen(!isCoursePickerOpen)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/90 shadow-sm hover:border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-800 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-[#252236] text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
                 aria-label="Switch Course track"
                 aria-expanded={isCoursePickerOpen}
               >
@@ -122,7 +139,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   {course.code || course.title}
                 </span>
                 {daysLeft !== null && daysLeft >= 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px] font-bold text-slate-700 font-mono">
+                  <span className="px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-[#2E2A44] text-[10px] font-bold text-slate-700 dark:text-slate-300 font-mono">
                     {daysLeft}d
                   </span>
                 )}
@@ -131,16 +148,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             ) : (
               <button
                 onClick={() => setIsCoursePickerOpen(!isCoursePickerOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 shadow-sm hover:border-slate-300 hover:bg-slate-100 text-xs font-semibold text-slate-600 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-[#252236] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
                 aria-label="No active track. Open track selector"
                 aria-expanded={isCoursePickerOpen}
               >
-                <span className="truncate max-w-[110px] text-slate-500 font-medium">No active track</span>
+                <span className="truncate max-w-[110px] text-slate-500 dark:text-slate-400 font-medium">No active track</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
             )}
 
-            {/* Course Switcher Popover (Clean position below button, z-50, Escape to dismiss) */}
+            {/* Course Switcher Popover */}
             {isCoursePickerOpen && (
               <>
                 <div 
@@ -151,9 +168,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <div 
                   role="dialog"
                   aria-label="Active Tracks Menu"
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50 rounded-2xl bg-white border border-slate-200/90 shadow-2xl p-2.5 animate-slide-up space-y-1"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50 rounded-2xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-2xl p-2.5 animate-slide-up space-y-1"
                 >
-                  <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
                     <span>Active Tracks ({courses.length})</span>
                     {onOpenCreateCourse && (
                       <button
@@ -161,7 +178,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                           setIsCoursePickerOpen(false);
                           onOpenCreateCourse();
                         }}
-                        className="text-slate-900 font-semibold hover:underline flex items-center gap-0.5 text-[10px] cursor-pointer"
+                        className="text-slate-900 dark:text-slate-100 font-semibold hover:underline flex items-center gap-0.5 text-[10px] cursor-pointer"
                       >
                         <Plus className="w-3 h-3 text-amber-500" />
                         <span>+ New</span>
@@ -171,14 +188,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
                   {courses.length === 0 ? (
                     <div className="p-3 text-center space-y-2.5">
-                      <p className="text-xs text-slate-400">No active tracks yet.</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-400">No active tracks yet.</p>
                       {onOpenCreateCourse && (
                         <button
                           onClick={() => {
                             setIsCoursePickerOpen(false);
                             onOpenCreateCourse();
                           }}
-                          className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                          className="w-full py-2 px-3 rounded-xl bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5 text-amber-400" />
                           <span>Create First Study Plan</span>
@@ -190,7 +207,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                             setIsCoursePickerOpen(false);
                             onLoadSampleCourse();
                           }}
-                          className="w-full py-1.5 text-[11px] text-slate-500 hover:text-slate-800 underline transition cursor-pointer"
+                          className="w-full py-1.5 text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 underline transition cursor-pointer"
                         >
                           Try a sample course
                         </button>
@@ -204,7 +221,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                           <div 
                             key={c.id} 
                             className={`flex items-center justify-between rounded-xl transition group ${
-                              isSelected ? 'bg-slate-100 text-slate-900 font-bold' : 'hover:bg-slate-50 text-slate-700'
+                              isSelected 
+                                ? 'bg-slate-100 dark:bg-[#2E2A44] text-slate-900 dark:text-white font-bold' 
+                                : 'hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             <button
@@ -216,7 +235,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                             >
                               <span className="truncate font-sans font-medium">{c.title}</span>
                               {c.examDate && (
-                                <span className="text-[10px] text-slate-400 font-mono ml-2 shrink-0">
+                                <span className="text-[10px] text-slate-400 dark:text-slate-400 font-mono ml-2 shrink-0">
                                   {getDaysUntilExam(c.examDate)}d
                                 </span>
                               )}
@@ -227,7 +246,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                                   e.stopPropagation();
                                   onDeleteCourse(c.id);
                                 }}
-                                className="p-1.5 mr-1 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="p-1.5 mr-1 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 title="Delete track"
                                 aria-label={`Delete ${c.title}`}
                               >
@@ -248,12 +267,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="relative p-2 rounded-full bg-white border border-purple-100/80 shadow-sm hover:border-purple-200 text-zinc-600 hover:text-theme-dark transition-all cursor-pointer"
+              className="relative p-2 rounded-full bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-sm hover:border-slate-300 dark:hover:border-slate-600 text-zinc-600 dark:text-slate-300 hover:text-theme-dark dark:hover:text-white transition-all cursor-pointer"
               aria-label="Open notifications"
             >
               <Bell className="w-4 h-4 stroke-[2.2]" />
               {unreadNotifs > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-theme-accent text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white shadow-sm font-mono">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-theme-accent text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-[#13111C] shadow-sm font-mono">
                   {unreadNotifs}
                 </span>
               )}

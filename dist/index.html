@@ -11,12 +11,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2318181B'><rect width='24' height='24' rx='7' fill='%2318181B'/><path d='M12 3L2 8l10 5 10-5-10-5zm-7 8.5v4.5c0 2.5 3.5 4.5 7 4.5s7-2 7-4.5v-4.5l-7 3.5-7-3.5z' fill='%23FBBF24'/></svg>" />
-    <script type="module" crossorigin src="/assets/index-CWq3qqMd.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DKRihc4t.css">
+    <!-- Meta Theme Color -->
+    <meta name="theme-color" content="#F8F9FA" id="meta-theme-color" />
+
+    <!-- Anti-Flash Dark Mode Script (Executes before React Mount) -->
+    <script>
+      (function() {
+        try {
+          const stored = localStorage.getItem('eduflow_v2_theme_mode') || 'system';
+          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const isDark = stored === 'dark' || (stored === 'system' && prefersDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            const meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', '#13111C');
+          } else {
+            document.documentElement.classList.remove('dark');
+            const meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', '#F8F9FA');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-CB8kSiXh.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DIwJXqiL.css">
   </head>
-  <body class="bg-[#F8F9FA] text-[#111827] antialiased selection:bg-amber-100 selection:text-amber-900 min-h-screen font-sans overflow-x-hidden">
+  <body class="bg-[#F8F9FA] dark:bg-[#13111C] text-[#111827] dark:text-[#F3F2F8] antialiased selection:bg-amber-100 selection:text-amber-900 min-h-screen font-sans overflow-x-hidden transition-colors duration-150">
     <div id="root"></div>
   </body>
 </html>

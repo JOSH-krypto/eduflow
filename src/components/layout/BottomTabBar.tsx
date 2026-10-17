@@ -23,7 +23,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 
   return (
     <nav 
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-purple-100/80 shadow-tab-bar select-none font-sans"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#13111C]/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-[#2E2A44] shadow-tab-bar select-none font-sans transition-colors"
       aria-label="Bottom Navigation"
     >
       <div className="max-w-md mx-auto px-4 h-16 sm:h-[70px] flex items-center justify-between relative">
@@ -39,13 +39,13 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
                 onClick={() => onSelectTab(tab.id)}
                 className={`flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'text-theme-dark font-bold scale-105'
-                    : 'text-zinc-400 hover:text-zinc-600 font-medium'
+                    ? 'text-slate-900 dark:text-white font-bold scale-105'
+                    : 'text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={tab.label}
               >
-                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-theme-light' : 'bg-transparent'}`}>
+                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-slate-100 dark:bg-[#2E2A44]' : 'bg-transparent'}`}>
                   <Icon className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <span className="text-[10px] tracking-tight font-heading">
@@ -60,11 +60,11 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
         <div className="absolute left-1/2 -top-5 -translate-x-1/2 flex items-center justify-center">
           <button
             onClick={onOpenQuickActions}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-theme-accent text-white flex items-center justify-center shadow-float-btn hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ring-4 ring-[#F8F7FC] focus:outline-none cursor-pointer"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-900 dark:bg-[#2E2A44] text-white flex items-center justify-center shadow-float-btn hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ring-4 ring-[#F8F7FC] dark:ring-[#13111C] focus:outline-none cursor-pointer"
             aria-label="Open Quick Actions Sheet"
             title="Create Task, Log Session, or AI Summarize"
           >
-            <Plus className="w-6 h-6 stroke-[2.8]" />
+            <Plus className="w-6 h-6 stroke-[2.8] text-amber-400" />
           </button>
         </div>
 
@@ -80,13 +80,13 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
                 onClick={() => onSelectTab(tab.id)}
                 className={`flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'text-theme-dark font-bold scale-105'
-                    : 'text-zinc-400 hover:text-zinc-600 font-medium'
+                    ? 'text-slate-900 dark:text-white font-bold scale-105'
+                    : 'text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={tab.label}
               >
-                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-theme-light' : 'bg-transparent'}`}>
+                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-slate-100 dark:bg-[#2E2A44]' : 'bg-transparent'}`}>
                   <Icon className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <span className="text-[10px] tracking-tight font-heading">

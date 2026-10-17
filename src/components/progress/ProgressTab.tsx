@@ -36,16 +36,16 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
 
   if (!course) {
     return (
-      <div className="w-full max-w-4xl mx-auto py-8 animate-fade-in font-sans space-y-6">
-        <div className="p-8 sm:p-12 rounded-3xl bg-white border border-purple-100/90 shadow-card text-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-theme-light text-theme-accent flex items-center justify-center mx-auto shadow-soft">
+      <div className="w-full max-w-4xl mx-auto py-8 animate-fade-in font-sans space-y-6 select-none">
+        <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-card text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-soft">
             <BarChart2 className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-800 font-heading">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white font-heading">
               No Analytics Available
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Create and study a course to view activity trends, focus scores, and subject breakdowns.
             </p>
           </div>
@@ -98,9 +98,9 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
   // Subject / Category Breakdown Donut Data from real tasks
   const categoryHoursMap: Record<string, { name: string; hours: number; color: string; bg: string }> = {
     video: { name: 'Study & Lectures', hours: 0, color: '#7C3AED', bg: '#F3E8FF' },
-    reading: { name: 'Review & Notes', hours: 0, color: '#0F766E', bg: '#CCFBF1' },
-    quiz: { name: 'Practice & Quizzes', hours: 0, color: '#047857', bg: '#D1FAE5' },
-    lab: { name: 'Labs & Coding', hours: 0, color: '#C2410C', bg: '#FEF3C7' },
+    lab: { name: 'Hands-on Practice', hours: 0, color: '#0F766E', bg: '#CCFBF1' },
+    reading: { name: 'Documentation', hours: 0, color: '#047857', bg: '#D1FAE5' },
+    quiz: { name: 'Quizzes & Reviews', hours: 0, color: '#C2410C', bg: '#FFEDD5' },
   };
 
   (course.agenda || []).forEach((t) => {
@@ -119,9 +119,9 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="p-2.5 bg-white border border-purple-100 rounded-2xl shadow-md text-xs">
-          <p className="font-bold text-[#1E1B4B] font-heading">{label}</p>
-          <p className="text-theme-dark font-bold mt-0.5">{payload[0].value} hours studied</p>
+        <div className="p-2.5 bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] rounded-2xl shadow-md text-xs">
+          <p className="font-bold text-slate-900 dark:text-white font-heading">{label}</p>
+          <p className="text-amber-600 dark:text-amber-400 font-bold mt-0.5">{payload[0].value} hours studied</p>
         </div>
       );
     }
@@ -129,34 +129,34 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6 animate-fade-in pb-16 font-sans">
+    <div className="w-full max-w-6xl mx-auto space-y-6 animate-fade-in pb-16 font-sans select-none">
       {/* Top Header & Period Switcher */}
-      <div className="p-5 sm:p-7 rounded-3xl bg-white border border-purple-100/90 shadow-card">
+      <div className="p-5 sm:p-7 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-card">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-2xl bg-theme-light text-theme-accent flex items-center justify-center">
+            <div className="w-8 h-8 rounded-2xl bg-slate-100 dark:bg-[#2E2A44] text-slate-800 dark:text-white flex items-center justify-center">
               <BarChart2 className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#1E1B4B] font-heading">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white font-heading">
                 Study Performance & Metrics
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-slate-400 dark:text-slate-400">
                 Weekly target tracking, time distribution, and session history
               </p>
             </div>
           </div>
 
           {/* Period Toggle Pills */}
-          <div className="flex items-center p-1 bg-[#F8F7FC] rounded-2xl border border-purple-100/60 text-xs font-semibold">
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-[#13111C] rounded-2xl border border-slate-200/60 dark:border-[#2E2A44] text-xs font-semibold">
             {(['Day', 'Week', 'Month', 'All Time'] as PeriodType[]).map((period) => (
               <button
                 key={period}
                 onClick={() => setActivePeriod(period)}
                 className={`px-3 py-1.5 rounded-xl transition-all font-heading cursor-pointer ${
                   activePeriod === period
-                    ? 'bg-white text-theme-dark shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-800'
+                    ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {period}
@@ -169,80 +169,80 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
       {/* Metric KPI Chips Grid (4 columns) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Chip 1: Total Study Time */}
-        <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
+        <div className="p-4 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/80 dark:border-[#2E2A44] shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-2xl bg-theme-light text-theme-accent flex items-center justify-center">
+            <div className="w-8 h-8 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-bold text-theme-dark bg-theme-light px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#2E2A44] px-2 py-0.5 rounded-full font-mono">
               Target {course.targetHoursPerWeek || 15}h
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
               Study Time
             </span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#1E1B4B] font-heading">
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-heading">
               {course.studiedHoursThisWeek || 0}h
             </span>
           </div>
         </div>
 
         {/* Chip 2: Sessions */}
-        <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
+        <div className="p-4 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/80 dark:border-[#2E2A44] shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-2xl bg-[#CCFBF1] text-[#0F766E] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-2xl bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-bold text-[#0F766E] bg-[#CCFBF1] px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/60 px-2 py-0.5 rounded-full font-mono">
               +{course.completedSessionsToday || 0} today
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
               Sessions Logged
             </span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#1E1B4B] font-heading">
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-heading">
               {totalSessionsLogged} Done
             </span>
           </div>
         </div>
 
         {/* Chip 3: Focus Score */}
-        <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
+        <div className="p-4 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/80 dark:border-[#2E2A44] shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-2xl bg-[#D1FAE5] text-[#047857] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
               <Target className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-bold text-[#047857] bg-[#D1FAE5] px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full font-mono">
               {totalTasks > 0 ? `${focusScore}%` : '—'}
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
               Focus Score
             </span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#1E1B4B] font-heading">
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-heading">
               {totalTasks > 0 ? (focusScore >= 75 ? 'High 🎯' : focusScore >= 40 ? 'Moderate' : 'Building') : '—'}
             </span>
           </div>
         </div>
 
         {/* Chip 4: Current Streak */}
-        <div className="p-4 rounded-3xl bg-white border border-purple-100/80 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
+        <div className="p-4 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/80 dark:border-[#2E2A44] shadow-card flex flex-col justify-between hover:shadow-card-hover transition-all">
           <div className="flex items-center justify-between">
-            <div className="w-8 h-8 rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <Flame className="w-4 h-4" />
             </div>
-            <span className="text-[10px] font-bold text-[#B45309] bg-[#FEF3C7] px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full font-mono">
               {course.streakDays > 0 ? 'Active 🔥' : 'Start Today'}
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
               Streak Active
             </span>
-            <span className="text-xl sm:text-2xl font-extrabold text-[#1E1B4B] font-heading">
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-heading">
               {course.streakDays || 0} Days
             </span>
           </div>
@@ -252,25 +252,25 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
       {/* Main Charts Grid: 2 Columns on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Chart: Study Time Trend Area Chart */}
-        <div className="lg:col-span-7 p-5 sm:p-6 rounded-3xl bg-white border border-purple-100/90 shadow-card space-y-4">
+        <div className="lg:col-span-7 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-card space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
                 Activity Distribution
               </span>
-              <h3 className="text-base font-bold text-[#1E1B4B] font-heading">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
                 Study Time Trend ({activePeriod})
               </h3>
             </div>
-            <span className="text-xs font-bold text-theme-dark bg-theme-light px-2.5 py-1 rounded-full font-mono">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-[#2E2A44] px-2.5 py-1 rounded-full font-mono">
               {totalStudiedHours > 0 ? `Total: ${totalStudiedHours}h` : '0h Logged'}
             </span>
           </div>
 
           {!hasPeriodActivity ? (
-            <div className="h-56 sm:h-64 w-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/60 rounded-2xl border border-slate-100 text-slate-400 space-y-1.5">
-              <Clock className="w-8 h-8 text-slate-300 mx-auto" />
-              <div className="text-xs font-semibold text-slate-600">No activity recorded in this period</div>
+            <div className="h-56 sm:h-64 w-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/60 dark:bg-[#13111C]/60 rounded-2xl border border-slate-100 dark:border-[#2E2A44] text-slate-400 space-y-1.5">
+              <Clock className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+              <div className="text-xs font-semibold text-slate-600 dark:text-slate-300">No activity recorded in this period</div>
               <div className="text-[11px] text-slate-400 max-w-xs">
                 Start a focus timer session or complete scheduled tasks to visualize your daily study curve.
               </div>
@@ -281,8 +281,8 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
                 <AreaChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorStudy" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--theme-accent)" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="var(--theme-accent)" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <XAxis 
@@ -290,20 +290,20 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
                     stroke="#9CA3AF" 
                     fontSize={11} 
                     tickLine={false} 
-                    axisLine={{ stroke: '#F3E8FF' }} 
+                    axisLine={{ stroke: '#2E2A44' }} 
                   />
                   <YAxis 
                     stroke="#9CA3AF" 
                     fontSize={11} 
                     tickLine={false} 
-                    axisLine={{ stroke: '#F3E8FF' }} 
+                    axisLine={{ stroke: '#2E2A44' }} 
                     unit="h" 
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Area 
                     type="monotone" 
                     dataKey="hours" 
-                    stroke="var(--theme-accent)" 
+                    stroke="#F59E0B" 
                     strokeWidth={3} 
                     fillOpacity={1} 
                     fill="url(#colorStudy)" 
@@ -315,25 +315,25 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
         </div>
 
         {/* Right Chart: Subject & Category Breakdown Donut Chart */}
-        <div className="lg:col-span-5 p-5 sm:p-6 rounded-3xl bg-white border border-purple-100/90 shadow-card space-y-4">
+        <div className="lg:col-span-5 p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-card space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 font-heading block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-heading block">
                 Time Distribution
               </span>
-              <h3 className="text-base font-bold text-[#1E1B4B] font-heading">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-heading">
                 Subject Breakdown
               </h3>
             </div>
-            <span className="text-xs font-bold text-zinc-500 font-mono">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
               {totalCategoryHours}h Planned
             </span>
           </div>
 
           {totalCategoryHours === 0 ? (
-            <div className="p-8 text-center rounded-2xl bg-slate-50/60 border border-slate-100 text-slate-400 space-y-1.5">
-              <Compass className="w-8 h-8 text-slate-300 mx-auto" />
-              <div className="text-xs font-semibold text-slate-600">No study categories logged yet</div>
+            <div className="p-8 text-center rounded-2xl bg-slate-50/60 dark:bg-[#13111C]/60 border border-slate-100 dark:border-[#2E2A44] text-slate-400 space-y-1.5">
+              <Compass className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+              <div className="text-xs font-semibold text-slate-600 dark:text-slate-300">No study categories logged yet</div>
               <div className="text-[11px] text-slate-400">
                 Categories are populated as you add modules and practice quizzes.
               </div>
@@ -358,10 +358,10 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
                 </ResponsiveContainer>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-lg font-extrabold text-[#1E1B4B] font-mono leading-none">
+                  <span className="text-lg font-extrabold text-slate-900 dark:text-white font-mono leading-none">
                     {totalCategoryHours}h
                   </span>
-                  <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider mt-0.5">
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                     Total
                   </span>
                 </div>
@@ -376,9 +376,9 @@ export const ProgressTab: React.FC<ProgressTabProps> = ({
                         className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
                         style={{ backgroundColor: cat.color }} 
                       />
-                      <span className="font-semibold text-zinc-700">{cat.name}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{cat.name}</span>
                     </div>
-                    <span className="font-bold text-[#1E1B4B] font-mono">{cat.hours}h</span>
+                    <span className="font-bold text-slate-900 dark:text-white font-mono">{cat.hours}h</span>
                   </div>
                 ))}
               </div>
