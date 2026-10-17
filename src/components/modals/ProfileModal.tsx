@@ -23,7 +23,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   if (!isOpen) return null;
 
   const [name, setName] = useState(userProfile.name || '');
-  const [email, setEmail] = useState(userProfile.email || '');
+  const email = userProfile.email || '';
   const [avatar, setAvatar] = useState(userProfile.avatar || '');
   const [planTier, setPlanTier] = useState(userProfile.planTier || 'Student');
   const [examDate, setExamDate] = useState(activeCourse?.examDate || '');
@@ -194,7 +194,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <div className="pt-2 flex items-center gap-2">
                 <input
                   type="url"
-                  placeholder="https://example.com/your-photo.jpg"
+                  placeholder="https://images.unsplash.com/your-photo"
                   value={customUrlInput}
                   onChange={(e) => setCustomUrlInput(e.target.value)}
                   className="flex-1 px-3 py-1.5 text-xs bg-[#141416] border border-white/[0.1] rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-[#2DD4BF]"
@@ -230,17 +230,23 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-bold text-zinc-300 block mb-1 font-heading">
-                Email Address
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-zinc-300 block font-heading">
+                  Email Address
+                </label>
+                <span className="text-[9px] text-zinc-500 font-medium bg-white/[0.04] px-1.5 py-0.2 rounded">
+                  Read-only
+                </span>
+              </div>
               <div className="relative">
                 <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder="name@university.edu"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 text-xs sm:text-sm bg-[#18181C] border border-white/[0.1] rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-[#F5A623]"
+                  readOnly
+                  disabled
+                  className="w-full pl-8 pr-3 py-2 text-xs sm:text-sm bg-[#121214] border border-white/[0.06] rounded-xl text-zinc-400 cursor-not-allowed select-none"
                 />
               </div>
             </div>

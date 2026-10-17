@@ -16,6 +16,8 @@ import {
   setActiveCourseId, 
   loadUserProfile, 
   saveUserProfile, 
+  defaultUserProfile,
+  clearUserData,
   loadNotifications, 
   saveNotifications, 
   recalculatePhaseProgress,
@@ -112,9 +114,25 @@ export const App: React.FC = () => {
     // Apply active theme tokens
     applyTheme(loadedProfile.preferences?.accentColor);
 
-    // Test backend connection
+    // Test backend connection and synchronize authenticated session
     api.healthCheck().then((healthy: boolean) => {
       setIsBackendConnected(healthy);
+      if (healthy) {
+        api.getMe().then((me) => {
+          if (me && me.email) {
+            setUserProfile(me);
+            api.getCourses().then((serverCourses) => {
+              if (serverCourses) {
+                setCourses(serverCourses);
+                if (serverCourses.length > 0 && !storedActiveId) {
+                  setActiveCourseIdState(serverCourses[0].id);
+                  setActiveCourseId(serverCourses[0].id);
+                }
+              }
+            });
+          }
+        });
+      }
     });
   }, []);
 
@@ -150,13 +168,39 @@ export const App: React.FC = () => {
     const existing = courses.find((c) => c.id === SAMPLE_AWS_COURSE_TEMPLATE.id);
     if (existing) {
       handleSelectCourse(existing.id);
-      triggerToast('Sample Course Selected', 'AWS Solutions Architect track activated.', 'info');
+      triggerToast('Sample Course Selected', 'Sample AWS Solutions Architect track activated.', 'info');
       return;
     }
     const updated = [SAMPLE_AWS_COURSE_TEMPLATE, ...courses];
     setCourses(updated);
     handleSelectCourse(SAMPLE_AWS_COURSE_TEMPLATE.id);
-    triggerToast('Sample Template Added', 'AWS Solutions Architect track is ready.', 'success');
+    triggerToast('Sample Course Added', 'Sample AWS course ready. You can delete it anytime in 1-click.', 'success');
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    await api.deleteCourse(courseId);
+    const updated = courses.filter((c) => c.id !== courseId);
+    setCourses(updated);
+    if (activeCourseId === courseId) {
+      const nextId = updated[0]?.id || '';
+      setActiveCourseIdState(nextId);
+      setActiveCourseId(nextId);
+    }
+    triggerToast('Course Removed', 'Study plan track removed successfully.', 'info');
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await api.logout();
+    } catch (err) {
+      console.warn('Logout fallback:', err);
+    }
+    clearUserData();
+    setUserProfile(defaultUserProfile);
+    setCourses([]);
+    setActiveCourseIdState('');
+    setIsAuthModalOpen(true);
+    triggerToast('Signed Out', 'You have been signed out successfully.', 'info');
   };
 
   const handleUpdateProfile = (updated: UserProfile) => {
@@ -311,7 +355,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7FC] text-slate-800 font-sans antialiased selection:bg-purple-200 selection:text-purple-900 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#F8F9FA] text-slate-900 font-sans antialiased selection:bg-amber-100 selection:text-amber-900 flex flex-col md:flex-row">
       {/* Tablet Slim Rail & Desktop Persistent Sidebar */}
       <NavigationSidebar
         activeTab={activeTab}
@@ -340,6 +384,8 @@ export const App: React.FC = () => {
           onSelectCourse={handleSelectCourse}
           onOpenProfile={() => setActiveTab('profile')}
           onOpenCreateCourse={() => setIsCourseModalOpen(true)}
+          onDeleteCourse={handleDeleteCourse}
+          onLoadSampleCourse={handleLoadSampleTemplate}
           notifications={notifications}
           onMarkAllNotificationsRead={handleMarkAllNotifsRead}
           onSelectNotification={handleSelectNotification}
@@ -382,8 +428,9 @@ export const App: React.FC = () => {
           {activeTab === 'profile' && (
             <ProfileTab
               profile={userProfile}
+              courses={courses}
               onUpdateProfile={handleUpdateProfile}
-              onSignOut={() => setIsAuthModalOpen(true)}
+              onSignOut={handleSignOut}
               isBackendConnected={isBackendConnected}
             />
           )}
@@ -486,13 +533,20 @@ export const App: React.FC = () => {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={(user) => {
-          setUserProfile((prev) => ({
-            ...prev,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar || prev.avatar,
-          }));
-          triggerToast('Welcome Back!', `Signed in as ${user.name}`, 'success');
+          setUserProfile(user);
+          setIsAuthModalOpen(false);
+          api.getCourses().then((serverCourses) => {
+            const list = serverCourses || [];
+            setCourses(list);
+            if (list.length > 0) {
+              setActiveCourseIdState(list[0].id);
+              setActiveCourseId(list[0].id);
+            } else {
+              setActiveCourseIdState('');
+              setActiveCourseId('');
+            }
+          });
+          triggerToast(`Welcome, ${user.name}! 👋`, `Signed in as ${user.email}`, 'success');
         }}
       />
     </div>

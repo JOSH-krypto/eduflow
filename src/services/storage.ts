@@ -10,18 +10,46 @@ import {
 } from '../types/eduflow';
 
 const STORAGE_KEYS = {
-  COURSES: 'eduflow_courses_data',
-  ACTIVE_COURSE_ID: 'eduflow_active_course_id',
-  USER_PROFILE: 'eduflow_user_profile',
-  NOTIFICATIONS: 'eduflow_notifications',
-  SESSION_LOGS: 'eduflow_session_logs',
-  RESEARCH_SUMMARIES: 'eduflow_research_summaries',
+  COURSES: 'eduflow_v2_courses',
+  ACTIVE_COURSE_ID: 'eduflow_v2_active_course_id',
+  USER_PROFILE: 'eduflow_v2_user_profile',
+  NOTIFICATIONS: 'eduflow_v2_notifications',
+  SESSION_LOGS: 'eduflow_v2_session_logs',
+  RESEARCH_SUMMARIES: 'eduflow_v2_research_summaries',
 };
+
+// Legacy keys from earlier prototypes to flush completely
+const LEGACY_KEYS = [
+  'eduflow_courses_data',
+  'eduflow_active_course_id',
+  'eduflow_user_profile',
+  'eduflow_notifications',
+  'eduflow_session_logs',
+  'eduflow_research_summaries',
+  'exam_prep_user_profile',
+  'exam_prep_exams',
+];
+
+export function purgeLegacyStorage(): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    LEGACY_KEYS.forEach((key) => {
+      localStorage.removeItem(key);
+    });
+  } catch (err) {
+    console.error('Failed to purge legacy storage', err);
+  }
+}
+
+// Automatically clear legacy prototype keys on load
+if (typeof window !== 'undefined') {
+  purgeLegacyStorage();
+}
 
 export const defaultUserProfile: UserProfile = {
   name: 'Student',
   avatar: '',
-  planTier: 'Pro Student',
+  planTier: 'Student',
   email: '',
   activeCourseId: '',
   totalHoursStudied: 0,
@@ -37,14 +65,21 @@ export const defaultUserProfile: UserProfile = {
   },
 };
 
-// Course Data
+import { SAMPLE_AWS_COURSE_TEMPLATE } from '../data/sampleCourseTemplate';
+
+export function getSampleCourse(): Course {
+  return JSON.parse(JSON.stringify(SAMPLE_AWS_COURSE_TEMPLATE));
+}
+
+// Course Data: Always defaults to empty array for fresh real user account
 export function loadCourses(): Course[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.COURSES);
     if (!data) {
       return [];
     }
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -86,6 +121,38 @@ export function saveUserProfile(profile: UserProfile): void {
   } catch (err) {
     console.error('Failed to save user profile', err);
   }
+}
+
+// Clear all active user data on Sign Out
+export function clearUserData(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.COURSES);
+    localStorage.removeItem(STORAGE_KEYS.ACTIVE_COURSE_ID);
+    localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
+    localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
+    localStorage.removeItem(STORAGE_KEYS.SESSION_LOGS);
+    localStorage.removeItem(STORAGE_KEYS.RESEARCH_SUMMARIES);
+  } catch (err) {
+    console.error('Failed to clear user data', err);
+  }
+}
+
+// Live stats computation: derived accurately from real courses and session logs
+export function computeRealUserStats(courses: Course[], sessionLogs: StudySessionLog[] = []) {
+  let minutes = 0;
+  courses.forEach((c) => {
+    (c.agenda || []).forEach((t) => {
+      if (t.status === 'completed') {
+        minutes += t.durationMinutes || 30;
+      }
+    });
+  });
+  sessionLogs.forEach((s) => {
+    minutes += s.durationMinutes || 0;
+  });
+  const totalHoursStudied = Math.round((minutes / 60) * 10) / 10;
+  const totalCertifications = courses.length;
+  return { totalHoursStudied, totalCertifications };
 }
 
 // Notifications

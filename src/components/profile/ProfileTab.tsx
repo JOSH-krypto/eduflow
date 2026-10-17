@@ -17,13 +17,15 @@ import {
   Coffee,
   AlertCircle
 } from 'lucide-react';
-import { UserProfile, UserPreferences } from '../../types/eduflow';
+import { UserProfile, UserPreferences, Course } from '../../types/eduflow';
 import { InitialsAvatar } from '../common/InitialsAvatar';
 import { api } from '../../services/api';
+import { computeRealUserStats, loadSessionLogs } from '../../services/storage';
 import { ACCENT_PALETTE, applyTheme, findAccentOption, DEFAULT_ACCENT_HEX } from '../../utils/theme';
 
 interface ProfileTabProps {
   profile: UserProfile;
+  courses?: Course[];
   onUpdateProfile: (updated: UserProfile) => void;
   onSignOut?: () => void;
   isBackendConnected?: boolean;
@@ -31,17 +33,25 @@ interface ProfileTabProps {
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({
   profile,
+  courses = [],
   onUpdateProfile,
   onSignOut,
   isBackendConnected = false,
 }) => {
   const [name, setName] = useState(profile.name || 'Student');
-  const [email, setEmail] = useState(profile.email || '');
+  const email = profile.email || '';
   const [avatar, setAvatar] = useState(profile.avatar || '');
   const [weeklyTargetHours, setWeeklyTargetHours] = useState(profile.weeklyTargetHours || 15);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Compute stats directly from live courses and session logs for 100% truthful data
+  const realStats = computeRealUserStats(courses, loadSessionLogs());
+  const displayHours = realStats.totalHoursStudied;
+  const displayTracks = courses.length;
 
   const [preferences, setPreferences] = useState<UserPreferences>(
     profile.preferences || {
@@ -143,19 +153,32 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     api.updateProfile(updatedProfile).catch(() => {});
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
     const updated: UserProfile = {
       ...profile,
-      name,
+      name: name.trim() || 'Student',
       email,
       avatar,
       weeklyTargetHours,
       preferences,
+      totalHoursStudied: displayHours,
+      totalCertifications: displayTracks,
     };
-    onUpdateProfile(updated);
-    api.updateProfile(updated).catch(() => {});
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+
+    try {
+      onUpdateProfile(updated);
+      await api.updateProfile(updated);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      console.error('Failed to save profile changes:', err);
+      setSaveError(err.message || 'Failed to save changes. Please try again.');
+      setTimeout(() => setSaveError(null), 4000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const currentAccentHex = preferences.accentColor || DEFAULT_ACCENT_HEX;
@@ -213,13 +236,19 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h2 className="text-lg sm:text-xl font-bold text-slate-800 font-heading">{name || 'Student'}</h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-theme-light text-theme-dark">
-                    {profile.planTier || 'Pro Student'}
-                  </span>
+                  {profile.planTier && profile.planTier.toLowerCase().includes('pro') ? (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 font-mono">
+                      Pro Student
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+                      {profile.planTier || 'Student'}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-slate-400 mt-1 flex items-center justify-center sm:justify-start gap-1">
                   <Mail className="w-3.5 h-3.5" />
-                  {email || 'No email set'}
+                  {email || 'No email registered'}
                 </p>
 
                 {uploadError && (
@@ -233,13 +262,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-theme-accent" />
                     <span>
-                      <strong className="text-slate-800 font-semibold">{profile.totalHoursStudied || 0}h</strong> studied
+                      <strong className="text-slate-800 font-semibold">{displayHours}h</strong> studied
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Award className="w-4 h-4 text-amber-500" />
                     <span>
-                      <strong className="text-slate-800 font-semibold">{profile.totalCertifications || 0}</strong> tracks
+                      <strong className="text-slate-800 font-semibold">{displayTracks}</strong> tracks
                     </span>
                   </div>
                 </div>
@@ -267,14 +296,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600">Email Address</label>
+                  <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                    Read-only
+                  </span>
+                </div>
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-theme-accent/30 focus:border-theme-accent transition"
-                  placeholder="your.email@example.com"
+                  readOnly
+                  disabled
+                  className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200/80 rounded-2xl text-xs font-medium text-slate-500 cursor-not-allowed select-none"
+                  placeholder="name@university.edu"
                 />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Primary account identifier. Contact support to request an email update.
+                </p>
               </div>
             </div>
           </div>
@@ -469,15 +507,21 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           </div>
 
           {/* Save Button */}
-          <div>
+          <div className="space-y-2">
             <button
               onClick={handleSave}
-              className="w-full py-3.5 bg-theme-accent hover:opacity-90 active:scale-[0.99] text-white font-bold rounded-2xl shadow-card transition flex items-center justify-center gap-2 text-sm font-heading cursor-pointer"
+              disabled={isSaving}
+              className="w-full py-3.5 bg-theme-accent hover:opacity-90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl shadow-card transition flex items-center justify-center gap-2 text-sm font-heading cursor-pointer"
             >
-              {saveSuccess ? (
+              {isSaving ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-300" />
-                  <span>Preferences Saved!</span>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Saving Profile Changes...</span>
+                </>
+              ) : saveSuccess ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-300 stroke-[3]" />
+                  <span>Profile Changes Saved!</span>
                 </>
               ) : (
                 <>
@@ -486,6 +530,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
                 </>
               )}
             </button>
+            {saveError && (
+              <p className="text-xs text-rose-500 text-center font-medium flex items-center justify-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                {saveError}
+              </p>
+            )}
           </div>
 
           {/* Sign Out / Switch User */}

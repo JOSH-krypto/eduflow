@@ -9,6 +9,7 @@ import {
 } from './storage';
 
 const API_BASE_URL = 
+  (import.meta as any).env?.VITE_API_BASE_URL || 
   (import.meta as any).env?.VITE_API_URL || 
   ((import.meta as any).env?.PROD 
     ? 'https://eduflow-el1u.onrender.com' 
@@ -69,7 +70,7 @@ class ApiService {
         name: data.name,
         email: data.email,
         avatar: '',
-        planTier: 'Pro Student',
+        planTier: 'Student',
         activeCourseId: '',
         totalHoursStudied: 0,
         totalCertifications: 0,
@@ -174,7 +175,7 @@ class ApiService {
   async getCourses(): Promise<Course[]> {
     try {
       const res = await this.request<{ courses: Course[] }>('/api/courses');
-      if (res.courses && res.courses.length > 0) {
+      if (res.courses && Array.isArray(res.courses)) {
         saveCourses(res.courses);
         return res.courses;
       }
@@ -196,6 +197,19 @@ class ApiService {
       saveCourses([course, ...current]);
       return course;
     }
+  }
+
+  async deleteCourse(courseId: string): Promise<void> {
+    try {
+      await this.request(`/api/courses/${courseId}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.warn('Backend deleteCourse fallback:', err);
+    }
+    const current = loadCourses();
+    const updated = current.filter((c) => c.id !== courseId);
+    saveCourses(updated);
   }
 
   // ================= TASKS =================

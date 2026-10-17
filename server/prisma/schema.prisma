@@ -14,9 +14,9 @@ model User {
   passwordHash         String
   name                 String
   avatar               String?           @default("")
-  planTier             String            @default("Pro Student")
+  planTier             String            @default("Student")
   totalHoursStudied    Float             @default(0.0)
-  totalCertifications  Int               @default(1)
+  totalCertifications  Int               @default(0)
   weeklyTargetHours    Int               @default(15)
   preferences          Json?
   createdAt            DateTime          @default(now())
@@ -36,7 +36,7 @@ model Course {
   examDate                String
   targetHoursPerWeek      Int               @default(15)
   studiedHoursThisWeek    Float             @default(0.0)
-  streakDays              Int               @default(1)
+  streakDays              Int               @default(0)
   completedSessionsToday  Int               @default(0)
   weeklyActivity          Json?
   topicMastery            Json?

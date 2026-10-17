@@ -37,7 +37,7 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
         email: email.toLowerCase(),
         passwordHash,
         name,
-        planTier: 'Pro Student',
+        planTier: 'Student',
         weeklyTargetHours: 15,
         preferences: {
           preferredStudyDays: [1, 2, 3, 4, 5],
@@ -45,7 +45,7 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
           streakReminders: true,
           examCountdownAlerts: true,
           newResourceAlerts: true,
-          accentColor: '#8B5CF6',
+          accentColor: '#7C3AED',
         },
       },
     });

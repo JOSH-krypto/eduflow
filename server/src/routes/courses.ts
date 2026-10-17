@@ -78,7 +78,7 @@ router.post('/', authMiddleware, validateBody(createCourseSchema), async (req: A
         examDate,
         targetHoursPerWeek: Number(targetHoursPerWeek) || 15,
         studiedHoursThisWeek: 0,
-        streakDays: 1,
+        streakDays: 0,
         completedSessionsToday: 0,
         phases: {
           create: (phases || []).map((p: any, index: number) => ({
