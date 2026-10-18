@@ -113,7 +113,12 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 // Start Server
 app.listen(PORT, () => {
   const isProd = process.env.NODE_ENV === 'production';
-  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-  console.info(`EduFlow backend [${process.env.NODE_ENV || 'development'}] listening on port ${PORT}`);
-  console.info(`Health check available at ${baseUrl}/healthz`);
+  const env = process.env.NODE_ENV || 'development';
+
+  if (isProd) {
+    console.info(`EduFlow backend [${env}] listening on port ${PORT}`);
+  } else {
+    console.info(`EduFlow backend [${env}] listening at http://localhost:${PORT}`);
+    console.info(`Health check available at http://localhost:${PORT}/healthz`);
+  }
 });
