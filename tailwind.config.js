@@ -84,16 +84,13 @@ export default {
         display: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       boxShadow: {
-        'card': '0 4px 25px -4px rgba(139, 92, 246, 0.07), 0 2px 10px -2px rgba(0, 0, 0, 0.02)',
-        'card-hover': '0 12px 35px -6px rgba(139, 92, 246, 0.12), 0 4px 14px -3px rgba(0, 0, 0, 0.04)',
-        'float-btn': '0 8px 24px -4px rgba(139, 92, 246, 0.45)',
-        'tab-bar': '0 -4px 24px -2px rgba(139, 92, 246, 0.06)',
-        'sheet': '0 -10px 40px -4px rgba(139, 92, 246, 0.15)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+        'elevated': '0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04)',
       },
       borderRadius: {
-        '2xl': '1.25rem',   // 20px
-        '3xl': '1.5rem',    // 24px
-        '4xl': '2rem',      // 32px
+        'md': '0.5rem',    // 8px
+        'lg': '0.75rem',   // 12px
+        'xl': '1rem',      // 16px
       },
       animation: {
         'fade-in': 'fadeIn 0.25s ease-out',

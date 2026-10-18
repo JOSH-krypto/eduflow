@@ -15,7 +15,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,10 +29,10 @@ services:
     environment:
       PORT: 4000
       NODE_ENV: production
-      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres:5432/eduflow_db?schema=public"
-      JWT_SECRET: "eduflow-production-secure-jwt-key-2026"
+      DATABASE_URL: ${DATABASE_URL:-"postgresql://postgres:postgrespassword@postgres:5432/eduflow_db?schema=public"}
+      JWT_SECRET: ${JWT_SECRET:-"eduflow-production-secure-jwt-key-2026"}
       GEMINI_API_KEY: "${GEMINI_API_KEY}"
-      CLIENT_URL: "http://localhost:3000"
+      CLIENT_URL: ${CLIENT_URL:-"https://eduflow-eta-coral.vercel.app"}
     ports:
       - "4000:4000"
     depends_on:

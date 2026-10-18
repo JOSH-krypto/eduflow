@@ -30,31 +30,40 @@ app.use(cookieParser());
 const rawAllowed = process.env.ALLOWED_ORIGINS || CLIENT_URL;
 const allowedOrigins = rawAllowed
   .split(',')
-  .map((s) => s.trim())
+  .map((s) => s.trim().replace(/^["']|["']$/g, ''))
   .filter(Boolean);
 
-// Always allow standard dev origins in non-production
-const defaultDevOrigins = ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'];
+const defaultDevOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
-      
-      if (
-        allowedOrigins.includes(origin) ||
-        (process.env.NODE_ENV !== 'production' && defaultDevOrigins.includes(origin))
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error(`Origin ${origin} is not allowed by EduFlow CORS security policy.`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-  })
-);
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    const isExplicit = allowedOrigins.includes(origin);
+    const isDev =
+      process.env.NODE_ENV !== 'production' &&
+      (defaultDevOrigins.includes(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin));
+    const isVercel =
+      origin.endsWith('.vercel.app') || origin === CLIENT_URL;
+
+    if (isExplicit || isDev || isVercel) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Static uploads directory for local file preview
 const uploadsPath = path.join(process.cwd(), 'uploads');
@@ -105,7 +114,6 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 app.listen(PORT, () => {
   const isProd = process.env.NODE_ENV === 'production';
   const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-  console.log(`🚀 EduFlow Backend [${process.env.NODE_ENV || 'development'}] active on port ${PORT}`);
-  console.log(`🩺 Health check accessible at ${baseUrl}/healthz`);
-  console.log(`🔒 Gemini AI Proxy active on /api/ai/summarize`);
+  console.info(`EduFlow backend [${process.env.NODE_ENV || 'development'}] listening on port ${PORT}`);
+  console.info(`Health check available at ${baseUrl}/healthz`);
 });

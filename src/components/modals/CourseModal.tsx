@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Award, Plus, Check, Sparkles } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { Course } from '../../types/eduflow';
 
 interface CourseModalProps {
@@ -34,79 +34,79 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const courseId = `custom-cert-${Date.now()}`;
+    const courseId = `course-${Date.now()}`;
     const newCourse: Course = {
       id: courseId,
       title: title.trim(),
-      code: code.trim().toUpperCase() || 'CERT',
+      code: code.trim().toUpperCase() || 'COURSE',
       category: category.trim() || 'General',
       examDate,
       targetHoursPerWeek: Number(targetHours) || 15,
       studiedHoursThisWeek: 0,
-      streakDays: 1,
+      streakDays: 0,
       completedSessionsToday: 0,
       phases: [
         {
           id: `${courseId}-p1`,
           phaseNumber: 1,
-          title: 'Core Fundamentals & Key Concepts',
-          description: `Master foundational syllabus topics and core domain patterns for ${title}.`,
+          title: 'Core fundamentals',
+          description: `Foundational syllabus topics and core domain patterns for ${title}.`,
           status: 'in_progress',
-          dateRange: 'Week 1 – Week 3',
+          dateRange: 'Week 1 - Week 3',
           progressPercent: 0,
-          topicsCovered: ['Fundamentals', 'Domain Architecture', 'Key Services', 'Security'],
+          topicsCovered: ['Fundamentals', 'Architecture', 'Key services'],
           nextVideo: {
             type: 'video',
-            label: 'NEXT VIDEO',
-            title: `${title} Architecture Overview`,
+            label: 'Next video',
+            title: `${title} overview`,
             duration: '18m',
           },
           upcomingLab: {
             type: 'lab',
-            label: 'HANDS-ON LAB',
-            title: `Hands-on Sandbox Setup & Verification`,
+            label: 'Upcoming lab',
+            title: 'Environment setup and practice',
             duration: '35m',
           },
           subtopics: [
-            { id: `${courseId}-s1`, title: 'Core Architecture Overview & Mental Model', durationMinutes: 25, completed: false, type: 'video' },
-            { id: `${courseId}-s2`, title: 'High-Yield Domain Principles & Pitfalls', durationMinutes: 30, completed: false, type: 'reading' },
-            { id: `${courseId}-s3`, title: 'Hands-on Practice Sandbox Lab', durationMinutes: 45, completed: false, type: 'lab' },
-            { id: `${courseId}-s4`, title: 'Checkpoint Knowledge Quiz', durationMinutes: 15, completed: false, type: 'quiz' },
+            { id: `${courseId}-s1`, title: 'Core architecture overview', durationMinutes: 25, completed: false, type: 'video' },
+            { id: `${courseId}-s2`, title: 'Domain principles and review notes', durationMinutes: 30, completed: false, type: 'reading' },
+            { id: `${courseId}-s3`, title: 'Hands-on practice sandbox', durationMinutes: 45, completed: false, type: 'lab' },
+            { id: `${courseId}-s4`, title: 'Knowledge checkpoint quiz', durationMinutes: 15, completed: false, type: 'quiz' },
           ],
         },
         {
           id: `${courseId}-p2`,
           phaseNumber: 2,
-          title: 'Advanced Implementation & Edge Cases',
-          description: `Deep dive into complex scenarios, performance optimization, and reliability principles.`,
+          title: 'Advanced topics and implementation',
+          description: 'Detailed scenarios, performance optimization, and reliability.',
           status: 'locked',
-          dateRange: 'Week 4 – Week 6',
+          dateRange: 'Week 4 - Week 6',
           progressPercent: 0,
-          topicsCovered: ['Resilience', 'Cost Optimization', 'Troubleshooting', 'Automation'],
+          topicsCovered: ['Optimization', 'Troubleshooting', 'Automation'],
           subtopics: [
-            { id: `${courseId}-s5`, title: 'Complex Trade-off Analysis & Patterns', durationMinutes: 35, completed: false, type: 'video' },
-            { id: `${courseId}-s6`, title: 'Hands-on Troubleshooting Scenarios', durationMinutes: 50, completed: false, type: 'lab' },
+            { id: `${courseId}-s5`, title: 'Trade-off analysis and patterns', durationMinutes: 35, completed: false, type: 'video' },
+            { id: `${courseId}-s6`, title: 'Troubleshooting scenarios', durationMinutes: 50, completed: false, type: 'lab' },
           ],
         },
         {
           id: `${courseId}-p3`,
           phaseNumber: 3,
-          title: 'Exam Readiness & Timed Mock Exams',
-          description: `Full-length mock exam simulations, timed practice blocks, and weak-point remediation.`,
+          title: 'Exam review and practice tests',
+          description: 'Full-length practice questions, timed drills, and review.',
           status: 'locked',
-          dateRange: 'Week 7 – Week 8',
+          dateRange: 'Week 7 - Week 8',
           progressPercent: 0,
-          topicsCovered: ['Full Mock Exams', 'Weak Spot Remediation', 'Speed Drills'],
+          topicsCovered: ['Practice tests', 'Review notes', 'Mock exams'],
           subtopics: [
-            { id: `${courseId}-s7`, title: 'Timed Practice Exam (65 Questions)', durationMinutes: 90, completed: false, type: 'practice' },
-            { id: `${courseId}-s8`, title: 'Final High-Yield Review & Formula Sheet', durationMinutes: 30, completed: false, type: 'reading' },
+            { id: `${courseId}-s7`, title: 'Timed practice test', durationMinutes: 90, completed: false, type: 'practice' },
+            { id: `${courseId}-s8`, title: 'Final formula and concept review', durationMinutes: 30, completed: false, type: 'reading' },
           ],
         },
       ],
       agenda: [
         {
           id: `${courseId}-a1`,
-          title: `${title} Architecture Overview`,
+          title: `${title} overview`,
           type: 'video',
           durationMinutes: 25,
           status: 'current',
@@ -115,7 +115,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         },
         {
           id: `${courseId}-a2`,
-          title: 'High-Yield Domain Principles & Pitfalls',
+          title: 'Domain principles and review notes',
           type: 'reading',
           durationMinutes: 30,
           status: 'locked',
@@ -124,7 +124,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         },
         {
           id: `${courseId}-a3`,
-          title: 'Hands-on Sandbox Setup & Verification',
+          title: 'Environment setup and practice',
           type: 'lab',
           durationMinutes: 45,
           status: 'locked',
@@ -143,9 +143,9 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         { day: 'Sun', shortDate: 'S', hours: 0, targetHours: 3, studied: false },
       ],
       topicMastery: [
-        { topic: 'Core Architecture', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
-        { topic: 'High-Yield Principles', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
-        { topic: 'Hands-on Labs', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
+        { topic: 'Core architecture', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
+        { topic: 'Key principles', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
+        { topic: 'Practice labs', masteryPercent: 0, totalQuestions: 10, correctQuestions: 0 },
       ],
     };
 
@@ -158,31 +158,26 @@ export const CourseModal: React.FC<CourseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in font-sans select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs font-sans select-none">
       <div 
-        className="w-full max-w-md bg-white dark:bg-[#1C1929] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#2E2A44] overflow-hidden animate-slide-up flex flex-col"
+        className="w-full max-w-md bg-white dark:bg-[#1C1929] rounded-xl shadow-lg border border-slate-200 dark:border-[#2E2A44] overflow-hidden flex flex-col"
         role="dialog"
-        aria-label="Manage Study Tracks"
+        aria-label="Courses"
       >
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-violet-50/70 to-teal-50/40 dark:from-[#13111C] dark:to-[#1C1929] border-b border-slate-100 dark:border-[#2E2A44] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-slate-900 dark:bg-[#2E2A44] text-amber-400 flex items-center justify-center shadow-soft">
-              <Award className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-800 dark:text-white font-heading">
-                Study Tracks & Roadmaps
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Switch active target or create a new curriculum roadmap
-              </p>
-            </div>
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-[#2E2A44] flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              Courses
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Switch course or create a new study plan.
+            </p>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white dark:bg-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#3B3759] text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition shadow-sm cursor-pointer"
+            className="w-7 h-7 rounded-md bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -190,42 +185,41 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         </div>
 
         {/* Tab Toggle */}
-        <div className="px-5 pt-3 pb-1 flex gap-2 border-b border-slate-100 dark:border-[#2E2A44] bg-slate-50/50 dark:bg-[#13111C]/50">
+        <div className="px-4 pt-2.5 pb-1 flex gap-2 border-b border-slate-200 dark:border-[#2E2A44] bg-slate-50 dark:bg-[#13111C]">
           <button
             onClick={() => setMode('switch')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer tabular-nums ${
               mode === 'switch'
-                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-[#3B3759]'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white border border-slate-200 dark:border-[#3B3759]'
+                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            <span>My Tracks ({courses.length})</span>
+            Courses ({courses.length})
           </button>
           <button
             onClick={() => setMode('create')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
               mode === 'create'
-                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-[#3B3759]'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-white dark:bg-[#2E2A44] text-slate-900 dark:text-white border border-slate-200 dark:border-[#3B3759]'
+                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Study Plan</span>
+            New course
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 max-h-[60vh] overflow-y-auto">
+        <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
           {mode === 'switch' ? (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {courses.length === 0 && (
-                <div className="p-8 text-center text-slate-400 dark:text-slate-500 space-y-2">
-                  <p className="text-xs">No study tracks created yet.</p>
+                <div className="p-6 text-center text-slate-500 dark:text-slate-400 space-y-2">
+                  <p className="text-xs">No courses created yet.</p>
                   <button
                     onClick={() => setMode('create')}
-                    className="px-4 py-2 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold cursor-pointer"
+                    className="px-3.5 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg text-xs font-medium cursor-pointer"
                   >
-                    + Create Your First Plan
+                    Create a course
                   </button>
                 </div>
               )}
@@ -238,27 +232,27 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                       if (onSelectCourse) onSelectCourse(c.id);
                       onClose();
                     }}
-                    className={`p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+                    className={`p-3 rounded-lg border transition-colors flex items-center justify-between cursor-pointer ${
                       isActive
-                        ? 'bg-slate-100 dark:bg-[#2E2A44] border-slate-300 dark:border-[#3B3759] shadow-sm'
-                        : 'bg-slate-50 dark:bg-[#13111C] border-slate-100 dark:border-[#2E2A44] hover:bg-slate-100/70 dark:hover:bg-[#252236]'
+                        ? 'bg-slate-100 dark:bg-[#2E2A44] border-slate-900 dark:border-slate-100'
+                        : 'bg-white dark:bg-[#13111C] border-slate-200 dark:border-[#2E2A44] hover:bg-slate-50 dark:hover:bg-[#252236]'
                     }`}
                   >
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 min-w-0 flex-1 pr-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-800 dark:text-white">{c.title}</span>
-                        <span className="px-2 py-0.2 rounded text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">{c.title}</span>
+                        <span className="text-[10px] text-slate-500 tabular-nums">
                           {c.code}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-400">
-                        Exam: {c.examDate || 'No date set'} • {c.targetHoursPerWeek}h/wk target
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+                        Exam: {c.examDate || 'No date set'} · {c.targetHoursPerWeek}h/week target
                       </p>
                     </div>
 
                     {isActive && (
-                      <div className="w-6 h-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5" />
+                      <div className="w-5 h-5 rounded-full bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
                       </div>
                     )}
                   </div>
@@ -266,44 +260,44 @@ export const CourseModal: React.FC<CourseModalProps> = ({
               })}
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                  Exam / Certification Title
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                  Course or exam title
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Distributed Systems Architecture or AP Biology"
+                  placeholder="e.g. Distributed Systems"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Exam Code
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                    Course code
                   </label>
                   <input
                     type="text"
                     placeholder="e.g. CS-401"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Target Exam Date
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                    Target exam date
                   </label>
                   <input
                     type="date"
                     value={examDate}
                     onChange={(e) => setExamDate(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
                     required
                   />
                 </div>
@@ -311,36 +305,21 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Category Domain
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                    Category
                   </label>
                   <input
                     type="text"
-                    list="category-domain-suggestions"
-                    placeholder="e.g. Computer Science, Medicine, Law"
+                    placeholder="e.g. Computer Science"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
                   />
-                  <datalist id="category-domain-suggestions">
-                    <option value="Computer Science" />
-                    <option value="Cloud Architecture" />
-                    <option value="Artificial Intelligence" />
-                    <option value="Cybersecurity" />
-                    <option value="Software Engineering" />
-                    <option value="Data Science" />
-                    <option value="Medicine & Health" />
-                    <option value="Biochemistry" />
-                    <option value="Business & Management" />
-                    <option value="Finance & Accounting" />
-                    <option value="Law & Legal Studies" />
-                    <option value="Mathematics" />
-                  </datalist>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                    Weekly Goal (hrs)
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                    Weekly target (hours)
                   </label>
                   <input
                     type="number"
@@ -348,7 +327,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                     max="80"
                     value={targetHours}
                     onChange={(e) => setTargetHours(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
                   />
                 </div>
               </div>
@@ -357,16 +336,15 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 bg-slate-100 dark:bg-[#13111C] hover:bg-slate-200 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 font-semibold rounded-2xl text-xs transition cursor-pointer"
+                  className="flex-1 py-2 bg-slate-100 dark:bg-[#13111C] hover:bg-slate-200 dark:hover:bg-[#252236] text-slate-700 dark:text-slate-300 font-medium rounded-lg text-xs transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white font-bold rounded-2xl text-xs shadow-card transition flex items-center justify-center gap-1.5 cursor-pointer ring-1 ring-white/10"
+                  className="flex-1 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-medium rounded-lg text-xs transition cursor-pointer border border-slate-700/20 dark:border-white/20"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Create Track</span>
+                  Create course
                 </button>
               </div>
             </form>

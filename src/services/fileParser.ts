@@ -2,10 +2,9 @@ import * as pdfjsLib from 'pdfjs-dist';
 
 // Set up pdf.js worker
 try {
-  // Using unpkg or workerSrc
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '3.11.174'}/pdf.worker.min.js`;
-} catch (e) {
-  console.warn('PDF.js worker initialization notice', e);
+} catch {
+  // Ignore worker initialization error
 }
 
 export interface ParsedFileResult {
@@ -83,8 +82,6 @@ async function parsePdfFile(file: File): Promise<ParsedFileResult> {
       wordCount: countWords(cleanedText),
     };
   } catch (error) {
-    console.error('Error parsing PDF:', error);
-    // Fallback if worker or buffer fails
     throw new Error(`Failed to parse PDF "${file.name}". Please ensure the PDF is not password-protected or encrypted.`);
   }
 }

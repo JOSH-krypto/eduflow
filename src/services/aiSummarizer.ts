@@ -79,8 +79,8 @@ export async function summarizeResearchMaterial(params: SummarizeParams): Promis
       estimatedStudyTimeMinutes: backendSummary.estimatedStudyTimeMinutes || 20,
       tags: backendSummary.tags || ['StudyNotes', 'ExamPrep'],
     };
-  } catch (backendErr) {
-    console.warn('Backend AI proxy unavailable, attempting client fallback:', backendErr);
+  } catch (_backendErr) {
+    // Fallback to local API or heuristics
   }
 
   // 2. Client-side fallback if a local key is configured
@@ -88,8 +88,7 @@ export async function summarizeResearchMaterial(params: SummarizeParams): Promis
   if (apiKey) {
     try {
       return await callGeminiAPI(apiKey, textToAnalyze, courseTitle, fileName, customPromptFocus);
-    } catch (err: any) {
-      console.warn('Direct Gemini call failed, generating local intelligent analysis:', err);
+    } catch (_err: any) {
       return generateLocalIntelligentSummary(textToAnalyze, courseTitle, fileName);
     }
   }
@@ -207,7 +206,7 @@ function generateLocalIntelligentSummary(
     }
   }
 
-  // Fallback defaults if text had unstructured prose — extract directly from key sentences
+  // Fallback defaults if text had unstructured prose - extract directly from key sentences
   if (concepts.length === 0) {
     const keySentences = sentences.slice(0, 3);
     keySentences.forEach((s, i) => {

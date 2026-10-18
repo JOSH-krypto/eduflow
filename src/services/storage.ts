@@ -36,8 +36,8 @@ export function purgeLegacyStorage(): void {
     LEGACY_KEYS.forEach((key) => {
       localStorage.removeItem(key);
     });
-  } catch (err) {
-    console.error('Failed to purge legacy storage', err);
+  } catch {
+    // Ignore storage availability errors
   }
 }
 
@@ -88,8 +88,8 @@ export function loadCourses(): Course[] {
 export function saveCourses(courses: Course[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses));
-  } catch (err) {
-    console.error('Failed to save courses', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 
@@ -118,8 +118,8 @@ export function loadUserProfile(): UserProfile {
 export function saveUserProfile(profile: UserProfile): void {
   try {
     localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
-  } catch (err) {
-    console.error('Failed to save user profile', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 
@@ -132,8 +132,8 @@ export function clearUserData(): void {
     localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
     localStorage.removeItem(STORAGE_KEYS.SESSION_LOGS);
     localStorage.removeItem(STORAGE_KEYS.RESEARCH_SUMMARIES);
-  } catch (err) {
-    console.error('Failed to clear user data', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 
@@ -171,8 +171,8 @@ export function loadNotifications(): NotificationItem[] {
 export function saveNotifications(notifications: NotificationItem[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
-  } catch (err) {
-    console.error('Failed to save notifications', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 
@@ -189,8 +189,8 @@ export function loadSessionLogs(): StudySessionLog[] {
 export function saveSessionLogs(logs: StudySessionLog[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.SESSION_LOGS, JSON.stringify(logs));
-  } catch (err) {
-    console.error('Failed to save session logs', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 
@@ -209,8 +209,8 @@ export function loadResearchSummaries(): ResearchSummary[] {
 export function saveResearchSummaries(summaries: ResearchSummary[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.RESEARCH_SUMMARIES, JSON.stringify(summaries));
-  } catch (err) {
-    console.error('Failed to save research summaries', err);
+  } catch {
+    // Ignore storage quota error
   }
 }
 

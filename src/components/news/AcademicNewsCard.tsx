@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ExternalLink, BookOpen, Clock } from 'lucide-react';
+import { ExternalLink, Clock } from 'lucide-react';
 import { NewsItemDto } from '../../services/api';
 
 export function formatRelativeTime(dateString: string | Date): string {
@@ -28,38 +28,37 @@ export const AcademicNewsCard: React.FC<AcademicNewsCardProps> = ({ item }) => {
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col justify-between w-[300px] sm:w-[340px] flex-shrink-0 bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] hover:border-slate-300 dark:hover:border-[#3B3759] rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 text-left cursor-pointer"
+      className="group flex flex-col justify-between w-[300px] sm:w-[340px] shrink-0 bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] hover:border-slate-400 dark:hover:border-slate-600 rounded-xl p-4 transition-colors text-left cursor-pointer"
       title={`${item.title} (Opens in new tab)`}
     >
-      <div className="space-y-3">
-        {/* Optional Image with Fallback */}
+      <div className="space-y-2.5">
+        {/* Optional Image */}
         {item.imageUrl && !imageFailed ? (
-          <div className="w-full h-36 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#13111C] relative">
+          <div className="w-full h-36 rounded-lg overflow-hidden bg-slate-100 dark:bg-[#13111C] relative">
             <img
               src={item.imageUrl}
               alt={item.title}
               loading="lazy"
               onError={() => setImageFailed(true)}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/80 backdrop-blur-md text-[10px] font-semibold text-white">
+            <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-900/80 text-[10px] font-medium text-white">
               {item.source}
             </div>
           </div>
         ) : (
           <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-[#2E2A44] text-slate-800 dark:text-slate-200 font-sans">
-              <BookOpen className="w-3 h-3 text-amber-500" />
+            <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
               {item.source}
             </span>
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider">
               {item.category}
             </span>
           </div>
         )}
 
         {/* Headline */}
-        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors font-heading">
+        <h4 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 group-hover:text-slate-700 dark:group-hover:text-white transition-colors">
           {item.title}
         </h4>
 
@@ -69,13 +68,13 @@ export const AcademicNewsCard: React.FC<AcademicNewsCardProps> = ({ item }) => {
         </p>
       </div>
 
-      {/* Footer Info & Action */}
-      <div className="pt-3 mt-3 border-t border-slate-100 dark:border-[#2E2A44] flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
-        <span className="flex items-center gap-1 font-mono">
+      {/* Footer */}
+      <div className="pt-3 mt-3 border-t border-slate-100 dark:border-[#2E2A44] flex items-center justify-between text-[11px] text-slate-400 tabular-nums">
+        <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Updated {formatRelativeTime(item.publishedAt)}
+          {formatRelativeTime(item.publishedAt)}
         </span>
-        <span className="inline-flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+        <span className="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300">
           Read <ExternalLink className="w-3 h-3 ml-0.5" />
         </span>
       </div>

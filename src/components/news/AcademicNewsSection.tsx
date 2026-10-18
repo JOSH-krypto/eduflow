@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Newspaper, 
-  Sparkles, 
-  RefreshCw, 
   ArrowUpRight,
   AlertCircle
 } from 'lucide-react';
@@ -39,7 +36,6 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
   const carouselRef = useRef<HTMLDivElement>(null);
   const isTabVisibleRef = useRef<boolean>(true);
 
-  // Fetch news items for the active category
   const loadNews = useCallback(async (category: string, isBackground: boolean = false) => {
     if (!isBackground) {
       setIsLoading(true);
@@ -56,11 +52,9 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
 
       if (data && data.items) {
         if (isBackground) {
-          // Check if there are truly new items (different IDs at top)
           const currentTopId = newsItems[0]?.id;
           const newTopId = data.items[0]?.id;
           if (newTopId && currentTopId && newTopId !== currentTopId) {
-            // Do NOT shift under user; show "New stories" pill
             setIncomingItems(data.items);
           }
         } else {
@@ -71,9 +65,10 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
           setLastUpdated(data.lastUpdated);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!isBackground) {
-        setFetchError(err.message || 'Unable to load academic news feeds right now.');
+        const message = err instanceof Error ? err.message : 'Unable to load academic news feeds right now.';
+        setFetchError(message);
       }
     } finally {
       setIsLoading(false);
@@ -81,17 +76,14 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
     }
   }, [newsItems]);
 
-  // Initial load when category changes
   useEffect(() => {
     loadNews(selectedCategory, false);
   }, [selectedCategory]);
 
-  // Page Visibility API & background polling every 3 minutes
   useEffect(() => {
     const handleVisibilityChange = () => {
       isTabVisibleRef.current = !document.hidden;
       if (!document.hidden) {
-        // Tab just became visible: refresh quietly
         loadNews(selectedCategory, true);
       }
     };
@@ -102,7 +94,7 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
       if (isTabVisibleRef.current) {
         loadNews(selectedCategory, true);
       }
-    }, 3 * 60 * 1000); // 3 minutes
+    }, 3 * 60 * 1000);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -131,63 +123,57 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
   };
 
   return (
-    <section className="space-y-4 font-sans select-none" aria-label="Academic News">
-      {/* Section Header */}
+    <section className="space-y-4 font-sans select-none" aria-label="Academic news">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-              <Newspaper className="w-4 h-4" />
-            </span>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight font-heading">
-              What's happening in academia
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              Academic news
             </h2>
             {lastUpdated && (
-              <span className="hidden sm:inline text-[11px] font-mono text-slate-400 dark:text-slate-500">
+              <span className="hidden sm:inline text-xs tabular-nums text-slate-400 dark:text-slate-500">
                 · {isRefreshing ? 'Checking updates...' : `Updated ${formatRelativeTime(lastUpdated)}`}
               </span>
             )}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Curated research breakthroughs, higher ed updates, and scholarly insights from verified feeds
+            Research papers and updates from academic publications.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Incoming Stories Pill */}
           {incomingItems && (
             <button
               onClick={applyIncomingStories}
-              className="animate-bounce inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-full shadow-md transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium rounded-md transition cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span>New stories available</span>
             </button>
           )}
 
-          {/* Carousel Arrows */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => scrollCarousel('left')}
-              className="p-1.5 rounded-full bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 transition shadow-xs cursor-pointer"
-              aria-label="Scroll news left"
+              className="p-1.5 rounded-md bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => scrollCarousel('right')}
-              className="p-1.5 rounded-full bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 transition shadow-xs cursor-pointer"
-              aria-label="Scroll news right"
+              className="p-1.5 rounded-md bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 transition cursor-pointer"
+              aria-label="Scroll right"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
-          {/* View All Button */}
           {onOpenFullNews && (
             <button
               onClick={() => onOpenFullNews(selectedCategory)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-semibold shadow-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-medium transition cursor-pointer border border-slate-700/20 dark:border-white/10"
             >
               <span>View all</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -198,72 +184,44 @@ export const AcademicNewsSection: React.FC<AcademicNewsSectionProps> = ({ onOpen
 
       {/* Category Pills Bar */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        {CATEGORIES.map((cat) => {
-          const isSelected = selectedCategory === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                isSelected
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs'
-                  : 'bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#252236]'
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-3 py-1 rounded-md text-xs font-medium transition cursor-pointer shrink-0 ${
+              selectedCategory === cat
+                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                : 'bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#252236]'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
-      {/* Content Area: Carousel or Empty/Error State */}
+      {/* Carousel */}
       {isLoading ? (
-        <div className="flex items-center gap-4 overflow-hidden py-3">
-          {[1, 2, 3, 4].map((n) => (
+        <div className="flex gap-4 overflow-hidden py-1">
+          {[1, 2, 3].map((i) => (
             <div
-              key={n}
-              className="w-[300px] sm:w-[340px] h-48 bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] rounded-2xl p-4 animate-pulse flex-shrink-0 space-y-3"
-            >
-              <div className="h-4 bg-slate-100 dark:bg-[#2E2A44] rounded-full w-24" />
-              <div className="h-5 bg-slate-100 dark:bg-[#2E2A44] rounded-md w-full" />
-              <div className="h-5 bg-slate-100 dark:bg-[#2E2A44] rounded-md w-3/4" />
-              <div className="h-10 bg-slate-100 dark:bg-[#2E2A44] rounded-md w-full mt-4" />
-            </div>
+              key={i}
+              className="w-[300px] sm:w-[340px] shrink-0 h-44 rounded-xl bg-slate-100 dark:bg-[#1C1929] animate-pulse border border-slate-200/60 dark:border-[#2E2A44]"
+            />
           ))}
         </div>
       ) : fetchError ? (
-        <div className="p-8 text-center bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] rounded-2xl space-y-3">
-          <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
-          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Unable to load feed</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-            {fetchError}
-          </p>
-          <button
-            onClick={() => loadNews(selectedCategory, false)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-semibold rounded-xl transition cursor-pointer"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Retry Connection</span>
-          </button>
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" />
+          <span>{fetchError}</span>
         </div>
       ) : newsItems.length === 0 ? (
-        <div className="p-8 text-center bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] rounded-2xl space-y-2">
-          <Newspaper className="w-8 h-8 text-slate-400 mx-auto" />
-          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No recent articles in this category</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Check back shortly or browse other categories.
-          </p>
-          <button
-            onClick={() => setSelectedCategory('Top stories')}
-            className="text-xs text-amber-600 dark:text-amber-400 font-semibold hover:underline cursor-pointer"
-          >
-            Back to Top stories
-          </button>
+        <div className="p-6 text-center text-xs text-slate-500 rounded-xl bg-slate-50 dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44]">
+          No news articles found in this category.
         </div>
       ) : (
         <div
           ref={carouselRef}
-          className="flex items-stretch gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth no-scrollbar"
+          className="flex gap-4 overflow-x-auto py-1 scroll-smooth no-scrollbar"
         >
           {newsItems.map((item) => (
             <AcademicNewsCard key={item.id} item={item} />

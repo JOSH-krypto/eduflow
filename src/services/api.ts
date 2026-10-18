@@ -8,38 +8,51 @@ import {
   saveSessionLogs
 } from './storage';
 
-const API_BASE_URL = 
-  (import.meta as any).env?.VITE_API_BASE_URL || 
-  (import.meta as any).env?.VITE_API_URL || 
-  ((import.meta as any).env?.PROD 
-    ? 'https://eduflow-el1u.onrender.com' 
-    : 'http://localhost:4000');
+const getBaseUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) return envUrl;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:4000';
+    }
+  }
+  return 'https://eduflow-el1u.onrender.com';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const defaultHeaders: Record<string, string> = {};
 
-    // Don't set Content-Type for FormData
     if (!(options.body instanceof FormData)) {
       defaultHeaders['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-      credentials: 'include', // Pass httpOnly JWT cookies
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+        },
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API error: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `API error: ${response.status} ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (err: any) {
+      if (err.name === 'TypeError' || err.message === 'Failed to fetch') {
+        throw new Error('Unable to connect to the server. Check your connection or verify the backend is running.');
+      }
+      throw err;
     }
-
-    return response.json();
   }
 
   // ================= HEALTH CHECK =================
@@ -86,8 +99,8 @@ class ApiService {
   async logout(): Promise<void> {
     try {
       await this.request('/api/auth/logout', { method: 'POST' });
-    } catch (err) {
-      console.warn('Logout network notice:', err);
+    } catch {
+      // Local session cleared
     }
   }
 
@@ -104,7 +117,6 @@ class ApiService {
     }
   }
 
-  // ================= PROFILE & PHOTO UPLOAD =================
   async updateProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
     try {
       const res = await this.request<{ user: UserProfile }>('/api/profile', {
@@ -134,8 +146,7 @@ class ApiService {
       const current = loadUserProfile();
       saveUserProfile({ ...current, avatar: res.avatarUrl });
       return res.avatarUrl;
-    } catch (err) {
-      console.warn('Backend upload unavailable, using base64 local preview:', err);
+    } catch {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -183,15 +194,14 @@ class ApiService {
       await this.request(`/api/courses/${courseId}`, {
         method: 'DELETE',
       });
-    } catch (err) {
-      console.warn('Backend deleteCourse fallback:', err);
+    } catch {
+      // Local fallback handled
     }
     const current = loadCourses();
     const updated = current.filter((c) => c.id !== courseId);
     saveCourses(updated);
   }
 
-  // ================= TASKS =================
   async createTask(
     task: Partial<AgendaTask> & { title: string; type: AgendaTask['type']; durationMinutes: number; courseId?: string }
   ): Promise<AgendaTask> {
@@ -222,8 +232,8 @@ class ApiService {
         method: 'PATCH',
         body: JSON.stringify(updates),
       });
-    } catch (err) {
-      console.warn('Backend updateTask fallback:', err);
+    } catch {
+      // Local fallback handled
     }
   }
 

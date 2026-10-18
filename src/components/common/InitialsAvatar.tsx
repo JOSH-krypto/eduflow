@@ -13,7 +13,6 @@ export const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
   size = 'md',
   className = '',
 }) => {
-  // Extract clean initials
   const getInitials = (fullName: string): string => {
     if (!fullName || !fullName.trim()) return 'EF';
     const parts = fullName.trim().split(/\s+/);
@@ -23,29 +22,26 @@ export const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
 
   const initials = getInitials(name);
 
-  // Size styling mapping
   const sizeClasses = {
     sm: 'w-7 h-7 text-[11px]',
-    md: 'w-9 h-9 text-xs',
-    lg: 'w-12 h-12 text-sm',
-    xl: 'w-20 h-20 text-xl',
+    md: 'w-8 h-8 text-xs',
+    lg: 'w-10 h-10 text-sm',
+    xl: 'w-16 h-16 text-lg',
   };
 
-  // If real uploaded photo exists (and not empty)
   if (avatarUrl && avatarUrl.trim().length > 0 && !avatarUrl.includes('placeholder')) {
     return (
       <img
         src={avatarUrl}
         alt={name}
-        className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-purple-200/60 shadow-sm ${className}`}
+        className={`${sizeClasses[size]} rounded-full object-cover border border-slate-200 dark:border-[#2E2A44] ${className}`}
       />
     );
   }
 
-  // Initials Avatar on solid pastel lavender background
   return (
     <div
-      className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-[#EDE9FE] to-[#DDD6FE] text-[#6D28D9] font-bold font-heading flex items-center justify-center ring-2 ring-white shadow-sm flex-shrink-0 select-none ${className}`}
+      className={`${sizeClasses[size]} rounded-full bg-slate-100 dark:bg-[#2E2A44] text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-[#2E2A44] flex items-center justify-center shrink-0 select-none ${className}`}
       aria-label={`Avatar for ${name}`}
     >
       {initials}

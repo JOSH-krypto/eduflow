@@ -49,7 +49,7 @@ export function getDaysUntilExam(examDateStr?: string | null): number {
  * Format a calendar date string (e.g. "Sep 24, 2026")
  */
 export function formatExamDate(examDateStr?: string | null): string {
-  if (!examDateStr) return '—';
+  if (!examDateStr) return '';
   try {
     const d = new Date(examDateStr);
     if (isNaN(d.getTime())) return examDateStr;
@@ -103,14 +103,14 @@ export function getPhaseDynamicDateRange(
   if (phaseIndex === 0) {
     const start = new Date(today.getTime() - 14 * 86400000);
     const end = new Date(today.getTime() - 1 * 86400000);
-    return `${formatShortMonthDay(start)} – ${formatShortMonthDay(end)}`;
+    return `${formatShortMonthDay(start)} - ${formatShortMonthDay(end)}`;
   }
 
   // If current phase (phaseIndex 1)
   if (phaseIndex === 1) {
     const start = today;
     const end = new Date(today.getTime() + daysPerPhase * 86400000);
-    return `${formatShortMonthDay(start)} – ${formatShortMonthDay(end)}`;
+    return `${formatShortMonthDay(start)} - ${formatShortMonthDay(end)}`;
   }
 
   // Future phases
@@ -119,7 +119,7 @@ export function getPhaseDynamicDateRange(
   const start = new Date(today.getTime() + startOffset * 86400000);
   const end = phaseIndex === totalPhases - 1 ? examDate : new Date(today.getTime() + endOffset * 86400000);
 
-  return `${formatShortMonthDay(start)} – ${formatShortMonthDay(end)}`;
+  return `${formatShortMonthDay(start)} - ${formatShortMonthDay(end)}`;
 }
 
 /**
@@ -162,15 +162,15 @@ export function getBreakdownCounts(phases: Phase[]): {
 
 /**
  * Generate human-friendly Next Milestone string for Exam Readiness
- * e.g., "Complete Phase 2 — 4 labs remaining, ~3h20m"
+ * e.g., "Complete Phase 2: 4 labs remaining, ~3h20m"
  */
 export function getMilestoneSummary(phases: Phase[]): string {
   const inProgressPhase = phases.find(p => p.status === 'in_progress') || phases[0];
-  if (!inProgressPhase) return 'Curriculum Completed! 🎉 Ready for exam.';
+  if (!inProgressPhase) return 'Curriculum complete. Ready for exam.';
 
   const remainingSubtopics = inProgressPhase.subtopics.filter(s => !s.completed);
   if (remainingSubtopics.length === 0) {
-    return `Phase ${inProgressPhase.phaseNumber} complete — Ready to advance to Phase ${inProgressPhase.phaseNumber + 1}!`;
+    return `Phase ${inProgressPhase.phaseNumber} complete. Ready for Phase ${inProgressPhase.phaseNumber + 1}.`;
   }
 
   const remainingLabs = remainingSubtopics.filter(s => s.type === 'lab').length;
@@ -183,5 +183,5 @@ export function getMilestoneSummary(phases: Phase[]): string {
     ? `${remainingLabs} ${remainingLabs === 1 ? 'lab' : 'labs'} remaining`
     : `${remainingSubtopics.length} ${remainingSubtopics.length === 1 ? 'topic' : 'topics'} remaining`;
 
-  return `Complete Phase ${inProgressPhase.phaseNumber} — ${itemsPhrase}, ~${timeStr}`;
+  return `Complete Phase ${inProgressPhase.phaseNumber}: ${itemsPhrase}, ~${timeStr}`;
 }

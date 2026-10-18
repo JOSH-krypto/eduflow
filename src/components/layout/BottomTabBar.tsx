@@ -14,7 +14,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   onSelectTab,
   onOpenQuickActions,
 }) => {
-  const tabs: { id: TabKey; label: string; icon: any }[] = [
+  const tabs: { id: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'plan', label: 'Plan', icon: Compass },
     { id: 'progress', label: 'Progress', icon: BarChart2 },
@@ -23,11 +23,10 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 
   return (
     <nav 
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#13111C]/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-[#2E2A44] shadow-tab-bar select-none font-sans transition-colors"
-      aria-label="Bottom Navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#13111C] border-t border-slate-200 dark:border-[#2E2A44] select-none font-sans transition-colors"
+      aria-label="Bottom navigation"
     >
-      <div className="max-w-md mx-auto px-4 h-16 sm:h-[70px] flex items-center justify-between relative">
-        {/* Left Tabs (Home & Plan) */}
+      <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between relative">
         <div className="flex items-center justify-around flex-1 pr-6">
           {tabs.slice(0, 2).map((tab) => {
             const isActive = activeTab === tab.id;
@@ -37,18 +36,16 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 cursor-pointer ${
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-lg transition-colors cursor-pointer ${
                   isActive
-                    ? 'text-slate-900 dark:text-white font-bold scale-105'
-                    : 'text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
+                    ? 'text-slate-900 dark:text-white font-medium'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={tab.label}
               >
-                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-slate-100 dark:bg-[#2E2A44]' : 'bg-transparent'}`}>
-                  <Icon className="w-5 h-5 stroke-[2.2]" />
-                </div>
-                <span className="text-[10px] tracking-tight font-heading">
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px]">
                   {tab.label}
                 </span>
               </button>
@@ -56,19 +53,17 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
           })}
         </div>
 
-        {/* Center Raised Circular Plus Button */}
-        <div className="absolute left-1/2 -top-5 -translate-x-1/2 flex items-center justify-center">
+        <div className="absolute left-1/2 -top-4 -translate-x-1/2 flex items-center justify-center">
           <button
             onClick={onOpenQuickActions}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-900 dark:bg-[#2E2A44] text-white flex items-center justify-center shadow-float-btn hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ring-4 ring-[#F8F7FC] dark:ring-[#13111C] focus:outline-none cursor-pointer"
-            aria-label="Open Quick Actions Sheet"
-            title="Create Task, Log Session, or AI Summarize"
+            className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center border border-slate-700/20 dark:border-white/20 transition-transform active:scale-95 cursor-pointer shadow-sm"
+            aria-label="Open quick actions"
+            title="Add task, start session, or summarize"
           >
-            <Plus className="w-6 h-6 stroke-[2.8] text-amber-400" />
+            <Plus className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Right Tabs (Progress & Profile) */}
         <div className="flex items-center justify-around flex-1 pl-6">
           {tabs.slice(2, 4).map((tab) => {
             const isActive = activeTab === tab.id;
@@ -78,18 +73,16 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-2xl transition-all duration-200 cursor-pointer ${
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-lg transition-colors cursor-pointer ${
                   isActive
-                    ? 'text-slate-900 dark:text-white font-bold scale-105'
-                    : 'text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium'
+                    ? 'text-slate-900 dark:text-white font-medium'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={tab.label}
               >
-                <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-slate-100 dark:bg-[#2E2A44]' : 'bg-transparent'}`}>
-                  <Icon className="w-5 h-5 stroke-[2.2]" />
-                </div>
-                <span className="text-[10px] tracking-tight font-heading">
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px]">
                   {tab.label}
                 </span>
               </button>

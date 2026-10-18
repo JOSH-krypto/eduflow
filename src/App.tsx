@@ -24,7 +24,6 @@ import {
   loadResearchSummaries,
   addResearchSummary
 } from './services/storage';
-import { fireCelebrationConfetti, fireSmallBurst } from './services/confetti';
 import { api } from './services/api';
 import { applyTheme, ThemeMode, getStoredThemeMode, setStoredThemeMode } from './utils/theme';
 import { SAMPLE_AWS_COURSE_TEMPLATE } from './data/sampleCourseTemplate';
@@ -201,7 +200,7 @@ export const App: React.FC = () => {
     setActiveCourseId(courseId);
     const selected = courses.find((c) => c.id === courseId);
     if (selected) {
-      triggerToast('Course Switched', `Active path: ${selected.title}`, 'info');
+      triggerToast('Course switched', 'Selected course is active.', 'info');
     }
   };
 
@@ -209,17 +208,16 @@ export const App: React.FC = () => {
     const existing = courses.find((c) => c.id === SAMPLE_AWS_COURSE_TEMPLATE.id);
     if (existing) {
       handleSelectCourse(existing.id);
-      triggerToast('Sample Course Selected', 'Sample AWS Solutions Architect track activated.', 'info');
+      triggerToast('Course selected', 'Sample course is active.', 'info');
       return;
     }
     const updated = [SAMPLE_AWS_COURSE_TEMPLATE, ...courses];
     setCourses(updated);
     handleSelectCourse(SAMPLE_AWS_COURSE_TEMPLATE.id);
-    triggerToast('Sample Course Added', 'Sample AWS course ready. You can delete it anytime in 1-click.', 'success');
+    triggerToast('Course added', 'Sample course is ready.', 'success');
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    const courseToDelete = courses.find((c) => c.id === courseId);
     const updated = courses.filter((c) => c.id !== courseId);
     setCourses(updated);
 
@@ -232,14 +230,14 @@ export const App: React.FC = () => {
     if (isBackendConnected) {
       try {
         await api.deleteCourse(courseId);
-      } catch (e) {
-        console.warn('Backend delete course sync error:', e);
+      } catch {
+        // Silently handle backend sync error
       }
     }
 
     triggerToast(
-      'Track Deleted',
-      `"${courseToDelete?.title || 'Course'}" removed from your study tracks.`,
+      'Course deleted',
+      'Course removed from list.',
       'info'
     );
   };
@@ -249,14 +247,12 @@ export const App: React.FC = () => {
     if (!activeCourse) return;
 
     let justCompleted = false;
-    let completedTitle = '';
 
     const updatedAgenda = activeCourse.agenda.map((task) => {
       if (task.id === taskId) {
         const nextStatus = task.status === 'completed' ? 'current' : 'completed';
         if (nextStatus === 'completed') {
           justCompleted = true;
-          completedTitle = task.title;
         }
         return {
           ...task,
@@ -279,8 +275,7 @@ export const App: React.FC = () => {
     setCourses(newCourses);
 
     if (justCompleted) {
-      fireSmallBurst();
-      triggerToast('Task Completed! 🎉', `"${completedTitle}" marked done!`, 'success');
+      triggerToast('Task completed', 'Marked done in agenda.', 'success');
     }
 
     if (isBackendConnected) {
@@ -292,8 +287,8 @@ export const App: React.FC = () => {
             progressPercent: taskToUpdate.progressPercent,
           });
         }
-      } catch (err) {
-        console.warn('Failed to sync task toggle to backend:', err);
+      } catch {
+        // Backend sync fallback handled gracefully
       }
     }
   };
@@ -355,17 +350,12 @@ export const App: React.FC = () => {
           completedAt: new Date().toISOString(),
           notes: log.notes,
         });
-      } catch (err) {
-        console.warn('Backend sync session failed:', err);
+      } catch {
+        // Backend sync fallback handled gracefully
       }
     }
 
-    fireCelebrationConfetti();
-    triggerToast(
-      'Focus Block Logged! 🔥',
-      `Studied ${log.durationMinutes}m on "${log.taskTitle}". Keep up the momentum!`,
-      'success'
-    );
+    triggerToast('Study session recorded', `${log.durationMinutes} minutes logged.`, 'success');
   };
 
   // Add a new task to agenda
@@ -385,7 +375,7 @@ export const App: React.FC = () => {
     };
 
     setCourses(courses.map((c) => (c.id === activeCourse.id ? updatedCourse : c)));
-    triggerToast('Task Added', `"${newTask.title}" added to your focus plan!`, 'success');
+    triggerToast('Task added', 'Added to study agenda.', 'success');
 
     if (isBackendConnected) {
       try {
@@ -395,8 +385,8 @@ export const App: React.FC = () => {
           durationMinutes: newTask.durationMinutes,
           phaseId: newTask.phaseId,
         });
-      } catch (err) {
-        console.warn('Backend sync create task failed:', err);
+      } catch {
+        // Backend sync fallback handled gracefully
       }
     }
   };
@@ -405,13 +395,13 @@ export const App: React.FC = () => {
   const handleSaveSummary = (summary: ResearchSummary) => {
     const updated = addResearchSummary(summary);
     setSummaries(updated);
-    triggerToast('Summary Saved', `"${summary.title}" stored to your research notebook.`, 'success');
+    triggerToast('Summary saved', 'Stored in research history.', 'success');
   };
 
   // Update profile
   const handleUpdateProfile = (updated: UserProfile) => {
     setUserProfile(updated);
-    triggerToast('Profile Updated', 'Your settings and appearance preferences were saved.', 'success');
+    triggerToast('Profile updated', 'Account preferences were saved.', 'success');
   };
 
   // Sign out handler
@@ -425,7 +415,7 @@ export const App: React.FC = () => {
     setActiveCourseIdState('');
     setActiveTab('home');
     setIsAuthModalOpen(true);
-    triggerToast('Signed Out', 'You have been safely signed out. Sign in anytime to restore your account.', 'info');
+    triggerToast('Signed out', 'Session ended successfully.', 'info');
   };
 
   // Notifications Handlers
@@ -631,7 +621,7 @@ export const App: React.FC = () => {
           setCourses(updated);
           handleSelectCourse(newCourse.id);
           setIsCourseModalOpen(false);
-          triggerToast('Study Plan Created! 🚀', `"${newCourse.title}" is now active.`, 'success');
+          triggerToast('Course created', 'Course is now active.', 'success');
         }}
       />
 
@@ -658,7 +648,7 @@ export const App: React.FC = () => {
               setActiveCourseId('');
             }
           });
-          triggerToast(`Welcome, ${user.name}! 👋`, `Signed in as ${user.email}`, 'success');
+          triggerToast('Signed in', `Signed in as ${user.email}.`, 'success');
         }}
       />
     </div>

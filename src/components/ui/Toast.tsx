@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, AlertCircle, Sparkles, Flame, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, Flame, X } from 'lucide-react';
 
 export interface ToastData {
   id: string;
@@ -19,26 +19,26 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'streak':
-        return <Flame className="w-5 h-5 text-[#F5A623] animate-pulse-subtle" />;
+        return <Flame className="w-4 h-4 text-amber-500" />;
       case 'success':
-        return <CheckCircle2 className="w-5 h-5 text-[#2DD4BF]" />;
+        return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-400" />;
+        return <AlertCircle className="w-4 h-4 text-rose-500" />;
       default:
-        return <Sparkles className="w-5 h-5 text-[#F5A623]" />;
+        return <Info className="w-4 h-4 text-slate-500 dark:text-slate-400" />;
     }
   };
 
   const getBorderColor = () => {
     switch (toast.type) {
       case 'streak':
-        return 'border-[#F5A623]/50 bg-[#171512] shadow-lg shadow-[#F5A623]/10';
+        return 'border-amber-200 dark:border-amber-900/60 bg-white dark:bg-[#1C1929] text-slate-900 dark:text-white';
       case 'success':
-        return 'border-[#2DD4BF]/50 bg-[#121816] shadow-lg shadow-[#2DD4BF]/10';
+        return 'border-emerald-200 dark:border-emerald-900/60 bg-white dark:bg-[#1C1929] text-slate-900 dark:text-white';
       case 'error':
-        return 'border-red-500/50 bg-[#1a1212]';
+        return 'border-rose-200 dark:border-rose-900/60 bg-white dark:bg-[#1C1929] text-slate-900 dark:text-white';
       default:
-        return 'border-white/[0.12] bg-[#141416]';
+        return 'border-slate-200 dark:border-[#2E2A44] bg-white dark:bg-[#1C1929] text-slate-900 dark:text-white';
     }
   };
 
@@ -48,27 +48,27 @@ export const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
       className="fixed bottom-6 right-6 z-50 max-w-sm w-full pointer-events-none"
     >
       <div 
-        className={`pointer-events-auto p-4 rounded-2xl border ${getBorderColor()} shadow-2xl flex items-start gap-3 animate-scale-in`}
+        className={`pointer-events-auto p-3.5 rounded-xl border ${getBorderColor()} shadow-md flex items-start gap-3 animate-scale-in`}
         role="status"
         aria-live="polite"
       >
-        <div className="p-2 rounded-xl bg-white/[0.05] flex-shrink-0">
+        <div className="p-1 rounded-md bg-slate-100 dark:bg-[#13111C] flex-shrink-0 mt-0.5">
           {getIcon()}
         </div>
 
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-white tracking-tight truncate">
+          <h4 className="text-xs font-semibold text-slate-900 dark:text-white tracking-tight truncate">
             {toast.title}
           </h4>
-          <p className="text-xs text-zinc-300 mt-0.5 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
             {toast.message}
           </p>
         </div>
 
         <button
           onClick={onClose}
-          className="p-1 text-zinc-400 hover:text-white transition-colors"
-          aria-label="Dismiss toast"
+          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+          aria-label="Dismiss"
         >
           <X className="w-4 h-4" />
         </button>

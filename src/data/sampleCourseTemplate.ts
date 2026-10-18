@@ -2,7 +2,7 @@ import { Course } from '../types/eduflow';
 
 export const SAMPLE_AWS_COURSE_TEMPLATE: Course = {
   id: 'template-aws-solutions-architect',
-  title: 'AWS Certified Solutions Architect – Associate',
+  title: 'AWS Certified Solutions Architect - Associate',
   code: 'SAA-C03',
   category: 'Cloud Architecture',
   examDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

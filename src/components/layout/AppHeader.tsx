@@ -97,13 +97,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search modules, tasks, research papers, news..."
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-[#1C1929] hover:bg-white dark:hover:bg-[#252236] border border-slate-200/90 dark:border-[#2E2A44] rounded-full text-xs font-medium text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-[#1C1929] focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:focus:ring-white/10 focus:border-slate-400 dark:focus:border-[#3B3759] shadow-sm transition-all"
+                placeholder="Search tasks, courses, and notes"
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-[#1C1929] hover:bg-white dark:hover:bg-[#252236] border border-slate-200/90 dark:border-[#2E2A44] rounded-lg text-xs font-medium text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-[#1C1929] focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 shadow-xs transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => onSearchChange('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-[#2E2A44] text-slate-400 cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-slate-100 dark:hover:bg-[#2E2A44] text-slate-400 cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X className="w-3 h-3" />
@@ -131,15 +131,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {course ? (
               <button
                 onClick={() => setIsCoursePickerOpen(!isCoursePickerOpen)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-[#252236] text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
-                aria-label="Switch Course track"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] shadow-xs hover:bg-slate-50 dark:hover:bg-[#252236] text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
+                aria-label="Switch course"
                 aria-expanded={isCoursePickerOpen}
               >
                 <span className="truncate max-w-[85px] sm:max-w-[140px] font-bold">
                   {course.code || course.title}
                 </span>
                 {daysLeft !== null && daysLeft >= 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-[#2E2A44] text-[10px] font-bold text-slate-700 dark:text-slate-300 font-mono">
+                  <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#2E2A44] text-[10px] font-medium text-slate-700 dark:text-slate-300 tabular-nums">
                     {daysLeft}d
                   </span>
                 )}
@@ -148,11 +148,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             ) : (
               <button
                 onClick={() => setIsCoursePickerOpen(!isCoursePickerOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-[#252236] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
-                aria-label="No active track. Open track selector"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] shadow-xs hover:bg-slate-100 dark:hover:bg-[#252236] text-xs font-semibold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+                aria-label="No active course. Open course selector"
                 aria-expanded={isCoursePickerOpen}
               >
-                <span className="truncate max-w-[110px] text-slate-500 dark:text-slate-400 font-medium">No active track</span>
+                <span className="truncate max-w-[110px] text-slate-500 dark:text-slate-400 font-medium">No active course</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
             )}
@@ -167,11 +167,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 />
                 <div 
                   role="dialog"
-                  aria-label="Active Tracks Menu"
-                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50 rounded-2xl bg-white dark:bg-[#1C1929] border border-slate-200/90 dark:border-[#2E2A44] shadow-2xl p-2.5 animate-slide-up space-y-1"
+                  aria-label="Active courses menu"
+                  className="absolute right-0 top-full mt-2 w-72 sm:w-80 z-50 rounded-xl bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] shadow-md p-2 animate-slide-up space-y-1"
                 >
                   <div className="flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
-                    <span>Active Tracks ({courses.length})</span>
+                    <span>Active courses ({courses.length})</span>
                     {onOpenCreateCourse && (
                       <button
                         onClick={() => {
@@ -180,25 +180,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                         }}
                         className="text-slate-900 dark:text-slate-100 font-semibold hover:underline flex items-center gap-0.5 text-[10px] cursor-pointer"
                       >
-                        <Plus className="w-3 h-3 text-amber-500" />
-                        <span>+ New</span>
+                        <Plus className="w-3 h-3" />
+                        <span>Add</span>
                       </button>
                     )}
                   </div>
 
                   {courses.length === 0 ? (
                     <div className="p-3 text-center space-y-2.5">
-                      <p className="text-xs text-slate-400 dark:text-slate-400">No active tracks yet.</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">No active courses yet.</p>
                       {onOpenCreateCourse && (
                         <button
                           onClick={() => {
                             setIsCoursePickerOpen(false);
                             onOpenCreateCourse();
                           }}
-                          className="w-full py-2 px-3 rounded-xl bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                          className="w-full py-2 px-3 rounded-lg bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
                         >
-                          <Plus className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Create First Study Plan</span>
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Create study plan</span>
                         </button>
                       )}
                       {onLoadSampleCourse && (
@@ -220,9 +220,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                         return (
                           <div 
                             key={c.id} 
-                            className={`flex items-center justify-between rounded-xl transition group ${
+                            className={`flex items-center justify-between rounded-lg transition group ${
                               isSelected 
-                                ? 'bg-slate-100 dark:bg-[#2E2A44] text-slate-900 dark:text-white font-bold' 
+                                ? 'bg-slate-100 dark:bg-[#2E2A44] text-slate-900 dark:text-white font-semibold' 
                                 : 'hover:bg-slate-50 dark:hover:bg-[#252236] text-slate-700 dark:text-slate-300'
                             }`}
                           >
@@ -231,11 +231,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                                 onSelectCourse(c.id);
                                 setIsCoursePickerOpen(false);
                               }}
-                              className="flex-1 flex items-center justify-between p-2.5 text-xs text-left cursor-pointer"
+                              className="flex-1 flex items-center justify-between p-2 text-xs text-left cursor-pointer"
                             >
                               <span className="truncate font-sans font-medium">{c.title}</span>
                               {c.examDate && (
-                                <span className="text-[10px] text-slate-400 dark:text-slate-400 font-mono ml-2 shrink-0">
+                                <span className="text-[10px] text-slate-400 dark:text-slate-400 tabular-nums ml-2 shrink-0">
                                   {getDaysUntilExam(c.examDate)}d
                                 </span>
                               )}
@@ -246,8 +246,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                                   e.stopPropagation();
                                   onDeleteCourse(c.id);
                                 }}
-                                className="p-1.5 mr-1 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                                title="Delete track"
+                                className="p-1 mr-1 text-slate-300 hover:text-rose-500 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                title="Delete course"
                                 aria-label={`Delete ${c.title}`}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

@@ -4,8 +4,7 @@ import {
   Play, 
   Pause, 
   RotateCcw, 
-  CheckCircle2, 
-  Flame 
+  CheckCircle2 
 } from 'lucide-react';
 import { fireCelebrationConfetti } from '../../services/confetti';
 import { TaskType, getCategoryTheme } from '../../types/eduflow';
@@ -43,13 +42,13 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
   const theme = getCategoryTheme(taskType);
 
   useEffect(() => {
-    let interval: any = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isRunning) {
       interval = setInterval(() => {
         if (mode === 'pomodoro') {
           setTimeLeftSeconds((prev) => {
             if (prev <= 1) {
-              clearInterval(interval);
+              if (interval) clearInterval(interval);
               setIsRunning(false);
               fireCelebrationConfetti();
               return 0;
@@ -60,10 +59,12 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
           setStopwatchSeconds((prev) => prev + 1);
         }
       }, 1000);
-    } else {
+    } else if (interval) {
       clearInterval(interval);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isRunning, mode]);
 
   const toggleTimer = () => {
@@ -92,7 +93,6 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
     onClose();
   };
 
-  // Format MM:SS
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
@@ -105,62 +105,56 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
       ? Math.min(100, Math.max(0, ((initialDuration - timeLeftSeconds) / initialDuration) * 100))
       : 100;
 
-  // SVG ring calculations
-  const radius = 90;
+  const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs font-sans">
       <div 
-        className="w-full max-w-sm bg-white dark:bg-[#1C1929] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#2E2A44] overflow-hidden animate-slide-up flex flex-col select-none"
+        className="w-full max-w-sm bg-white dark:bg-[#1C1929] rounded-xl shadow-lg border border-slate-200 dark:border-[#2E2A44] overflow-hidden flex flex-col select-none"
         role="dialog"
-        aria-label="Focus Timer"
+        aria-label="Focus timer"
       >
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-[#2E2A44] flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-teal-50/30 dark:from-[#13111C] dark:to-[#1C1929]">
-          <div className="flex items-center gap-2">
-            <span
-              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
-              style={{ backgroundColor: theme.badgeBg, color: theme.badgeText }}
-            >
-              {theme.name}
-            </span>
-          </div>
+        <div className="p-4 border-b border-slate-200 dark:border-[#2E2A44] flex items-center justify-between">
+          <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            {theme.name}
+          </span>
 
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white dark:bg-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#3B3759] text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition shadow-sm cursor-pointer"
+            className="w-7 h-7 rounded-md bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 text-center space-y-5">
           <div>
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white line-clamp-1 font-heading">{taskTitle}</h3>
-            <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-0.5">Stay focused • Deep work in progress</p>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">{taskTitle}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Study session</p>
           </div>
 
-          {/* Circular Countdown Ring */}
-          <div className="relative w-52 h-52 mx-auto flex items-center justify-center">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
+          {/* Countdown Ring */}
+          <div className="relative w-48 h-48 mx-auto flex items-center justify-center">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 180 180">
               <circle
-                cx="100"
-                cy="100"
+                cx="90"
+                cy="90"
                 r={radius}
                 className="stroke-slate-100 dark:stroke-[#252236]"
-                strokeWidth="10"
+                strokeWidth="8"
                 fill="none"
               />
               <circle
-                cx="100"
-                cy="100"
+                cx="90"
+                cy="90"
                 r={radius}
-                stroke={theme.accent}
-                strokeWidth="10"
+                stroke="#0F172A"
+                strokeWidth="8"
                 strokeLinecap="round"
                 fill="none"
                 style={{
@@ -171,24 +165,22 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
               />
             </svg>
 
-            {/* Centered Timer Readout */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-extrabold text-slate-800 dark:text-white font-mono tracking-tight">
+              <span className="text-3xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
                 {formatTime(currentSeconds)}
               </span>
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1">
-                <Flame className="w-3 h-3 text-amber-500 fill-amber-500" />
-                {isRunning ? 'Flowing' : 'Paused'}
+              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {isRunning ? 'Running' : 'Paused'}
               </span>
             </div>
           </div>
 
-          {/* Quick controls */}
+          {/* Controls */}
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={resetTimer}
-              className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
-              title="Reset Timer"
+              className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
+              title="Reset timer"
               aria-label="Reset timer"
             >
               <RotateCcw className="w-4 h-4" />
@@ -196,16 +188,16 @@ export const FocusTimerModal: React.FC<FocusTimerModalProps> = ({
 
             <button
               onClick={toggleTimer}
-              className="w-14 h-14 rounded-3xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer ring-1 ring-white/10"
+              className="w-12 h-12 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer border border-slate-700/20 dark:border-white/20"
               aria-label={isRunning ? 'Pause timer' : 'Start timer'}
             >
-              {isRunning ? <Pause className="w-6 h-6 stroke-[2.5]" /> : <Play className="w-6 h-6 stroke-[2.5] ml-0.5 fill-current" />}
+              {isRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />}
             </button>
 
             <button
               onClick={handleFinishEarly}
-              className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-[#2E2A44] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center transition cursor-pointer"
-              title="Finish & Log Block"
+              className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
+              title="Finish session"
               aria-label="Finish and log session"
             >
               <CheckCircle2 className="w-4 h-4" />

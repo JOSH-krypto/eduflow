@@ -25,7 +25,7 @@ Return ONLY valid JSON matching this exact structure without markdown code block
     {
       "type": "daily",
       "label": "Week 1: Core Foundations",
-      "dateRange": "Sep 9 – Sep 15",
+      "dateRange": "Sep 9 - Sep 15",
       "entries": [
         {
           "label": "Mon 9",
@@ -87,14 +87,13 @@ ${
     ? `\nREPLAN INSTRUCTIONS:
 The student has already completed the following topics:
 ${params.completedTopics?.map(t => `- ${t}`).join('\n')}
-Please optimize and condense the remaining schedule starting from ${todayStr} up to the exam date on ${params.examDate}, focusing heavily on the remaining uncompleted topics and final exam readiness!`
+Please optimize and condense the remaining schedule starting from ${todayStr} up to the exam date on ${params.examDate}, focusing heavily on the remaining uncompleted topics and final exam readiness.`
     : ''
 }
 
 Remember: Output ONLY the raw JSON object matching the contract. No explanations, no markdown ticks.`;
 
   if (!activeApiKey) {
-    console.warn('No Gemini API key provided. Using intelligent algorithmic fallback.');
     const fallback = generateAlgorithmicPlan(params);
     return { ...fallback, isMock: true };
   }
@@ -149,9 +148,7 @@ Remember: Output ONLY the raw JSON object matching the contract. No explanations
         ];
 
     return { phases, tips, isMock: false };
-  } catch (error: any) {
-    console.error('Gemini API request failed:', error);
-    // If API failed due to bad key or rate limit, fall back to algorithmic generator
+  } catch {
     const fallback = generateAlgorithmicPlan(params);
     return { ...fallback, isMock: true };
   }
@@ -242,7 +239,7 @@ export function generateAlgorithmicPlan(params: GeneratePlanParams): { phases: P
       id: `fallback-phase-1-${Date.now()}`,
       type: 'daily',
       label: 'Phase 1: Foundation & Core Topics',
-      dateRange: `${formatShortDay(chunk1[0])} – ${formatShortDay(chunk1[chunk1.length - 1])}`,
+      dateRange: `${formatShortDay(chunk1[0])} - ${formatShortDay(chunk1[chunk1.length - 1])}`,
       entries: p1Entries
     });
     phaseNum++;
@@ -282,7 +279,7 @@ export function generateAlgorithmicPlan(params: GeneratePlanParams): { phases: P
       id: `fallback-phase-2-${Date.now()}`,
       type: 'daily',
       label: 'Phase 2: Reinforcement & Weak Spots',
-      dateRange: `${formatShortDay(chunk2[0])} – ${formatShortDay(chunk2[chunk2.length - 1])}`,
+      dateRange: `${formatShortDay(chunk2[0])} - ${formatShortDay(chunk2[chunk2.length - 1])}`,
       entries: p2Entries
     });
     phaseNum++;
@@ -325,7 +322,7 @@ export function generateAlgorithmicPlan(params: GeneratePlanParams): { phases: P
       id: `fallback-phase-3-${Date.now()}`,
       type: 'weekly',
       label: `Phase ${phaseNum}: Final Mock Simulations`,
-      dateRange: `${formatShortDay(remainingDates[0])} – ${formatShortDay(remainingDates[remainingDates.length - 1])}`,
+      dateRange: `${formatShortDay(remainingDates[0])} - ${formatShortDay(remainingDates[remainingDates.length - 1])}`,
       entries: p3Entries
     });
   }

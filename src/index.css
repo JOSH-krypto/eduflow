@@ -52,18 +52,17 @@
 }
 
 .theme-shadow-float {
-  box-shadow: 0 8px 24px -4px var(--theme-accent-ring);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
 }
 
 .theme-shadow-soft {
-  box-shadow: 0 4px 20px -2px var(--theme-accent-light);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* Pill segmented control active */
 .pill-tab-active {
   background-color: var(--theme-accent);
   color: #FFFFFF;
-  box-shadow: 0 2px 10px -1px var(--theme-accent-ring);
 }
 
 body {
@@ -71,9 +70,6 @@ body {
   padding: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #F8F9FA;
-  background-image: radial-gradient(at 0% 0%, rgba(241, 245, 249, 0.8) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(248, 250, 252, 0.8) 0px, transparent 50%);
-  background-attachment: fixed;
   color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -82,7 +78,6 @@ body {
 
 .dark body {
   background-color: #13111C !important;
-  background-image: none !important;
   color: #F3F2F8 !important;
 }
 
@@ -114,14 +109,14 @@ h1, h2, h3, h4, h5, h6 {
 .kaggle-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 1.125rem; /* 18px */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .kaggle-card:hover {
   border-color: #CBD5E1;
-  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
 
 .dark .kaggle-card {
@@ -132,7 +127,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .dark .kaggle-card:hover {
   border-color: #3F3A5C !important;
-  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Kaggle Pill Segmented Control */
@@ -203,18 +198,18 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(161, 157, 184, 0.45);
 }
 
-/* Soft White Card Utility */
+/* Soft Card Utility */
 .eduflow-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 1.25rem; /* 20px */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .eduflow-card:hover {
   border-color: #CBD5E1;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
 
 .dark .eduflow-card {
@@ -225,7 +220,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .dark .eduflow-card:hover {
   border-color: #3F3A5C !important;
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25) !important;
 }
 
 /* Glass panel */

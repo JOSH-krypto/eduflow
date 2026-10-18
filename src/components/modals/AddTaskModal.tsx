@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, PlusCircle, Video, Terminal, BookOpen, CheckCircle } from 'lucide-react';
-import { AgendaTask, TaskType, Phase, getCategoryTheme } from '../../types/eduflow';
+import { X, Video, Terminal, BookOpen, CheckCircle } from 'lucide-react';
+import { AgendaTask, TaskType, Phase } from '../../types/eduflow';
 
 interface AddTaskModalProps {
   isOpen: boolean;
@@ -39,39 +39,34 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
     onClose();
   };
 
-  const typeOptions: { id: TaskType; label: string; icon: any; categoryKey: string }[] = [
-    { id: 'video', label: 'Video Lecture', icon: Video, categoryKey: 'study' },
-    { id: 'reading', label: 'Review & Reading', icon: BookOpen, categoryKey: 'review' },
-    { id: 'practice', label: 'Practice Quiz', icon: CheckCircle, categoryKey: 'practice' },
-    { id: 'lab', label: 'Hands-on Lab', icon: Terminal, categoryKey: 'lab' },
+  const typeOptions: { id: TaskType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { id: 'video', label: 'Video lecture', icon: Video },
+    { id: 'reading', label: 'Review and reading', icon: BookOpen },
+    { id: 'practice', label: 'Practice quiz', icon: CheckCircle },
+    { id: 'lab', label: 'Hands-on lab', icon: Terminal },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm animate-fade-in font-sans select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs font-sans select-none">
       <div 
-        className="w-full max-w-md bg-white dark:bg-[#1C1929] rounded-3xl shadow-2xl border border-slate-100 dark:border-[#2E2A44] overflow-hidden animate-slide-up"
+        className="w-full max-w-md bg-white dark:bg-[#1C1929] rounded-xl shadow-lg border border-slate-200 dark:border-[#2E2A44] overflow-hidden"
         role="dialog"
-        aria-label="Add Study Task"
+        aria-label="Add study task"
       >
         {/* Header */}
-        <div className="p-5 bg-gradient-to-r from-violet-50/70 to-teal-50/40 dark:from-[#13111C] dark:to-[#1C1929] border-b border-slate-100 dark:border-[#2E2A44] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-slate-900 dark:bg-[#2E2A44] text-amber-400 flex items-center justify-center shadow-soft">
-              <PlusCircle className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-800 dark:text-white font-heading">
-                Add Study Task
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Schedule a focus activity into today's plan
-              </p>
-            </div>
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-[#2E2A44] flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              Add study task
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Schedule a task into today's study plan.
+            </p>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white dark:bg-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#3B3759] text-slate-400 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition shadow-sm cursor-pointer"
+            className="w-7 h-7 rounded-md bg-slate-100 dark:bg-[#2E2A44] hover:bg-slate-200 dark:hover:bg-[#3B3759] text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -79,17 +74,17 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-3.5">
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-              Task Title / Focus Subject
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+              Task title
             </label>
             <input
               type="text"
-              placeholder="e.g. Master Consensus Protocol & Raft Leader Election"
+              placeholder="e.g. Master Consensus Protocol"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
               required
               autoFocus
             />
@@ -97,12 +92,11 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
 
           {/* Activity Category Selection */}
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-              Activity Category
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+              Task category
             </label>
             <div className="grid grid-cols-2 gap-2">
               {typeOptions.map((opt) => {
-                const theme = getCategoryTheme(opt.categoryKey);
                 const isSelected = type === opt.id;
                 const Icon = opt.icon;
 
@@ -111,19 +105,14 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
                     key={opt.id}
                     type="button"
                     onClick={() => setType(opt.id)}
-                    className={`p-2.5 rounded-2xl border text-left flex items-center gap-2 transition cursor-pointer ${
+                    className={`p-2.5 rounded-lg border text-left flex items-center gap-2 transition-colors cursor-pointer ${
                       isSelected
-                        ? 'border-amber-400 shadow-soft'
-                        : 'border-slate-100 dark:border-[#2E2A44] bg-slate-50/70 dark:bg-[#13111C]/70 hover:bg-slate-100/70 dark:hover:bg-[#252236]'
+                        ? 'border-slate-900 dark:border-slate-100 bg-slate-100 dark:bg-[#2E2A44] text-slate-900 dark:text-white font-medium'
+                        : 'border-slate-200 dark:border-[#2E2A44] bg-slate-50 dark:bg-[#13111C] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#252236]'
                     }`}
-                    style={
-                      isSelected
-                        ? { backgroundColor: theme.badgeBg, color: theme.badgeText }
-                        : undefined
-                    }
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="text-xs font-bold">{opt.label}</span>
+                    <Icon className="w-4 h-4 shrink-0 text-slate-500" />
+                    <span className="text-xs">{opt.label}</span>
                   </button>
                 );
               })}
@@ -132,9 +121,9 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
 
           {/* Duration in Minutes */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Estimated Duration</label>
-              <span className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full font-mono">
+            <div className="flex items-center justify-between mb-1 tabular-nums">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Estimated duration</label>
+              <span className="text-xs text-slate-500">
                 {durationMinutes} mins
               </span>
             </div>
@@ -144,10 +133,10 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
                   key={mins}
                   type="button"
                   onClick={() => setDurationMinutes(mins)}
-                  className={`flex-1 py-1.5 text-xs font-semibold rounded-xl border transition cursor-pointer ${
+                  className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors cursor-pointer tabular-nums ${
                     durationMinutes === mins
-                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-sm'
-                      : 'bg-slate-50 dark:bg-[#13111C] text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#252236]'
+                      ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-medium border-slate-900 dark:border-slate-100'
+                      : 'bg-slate-50 dark:bg-[#13111C] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#2E2A44] hover:bg-slate-100 dark:hover:bg-[#252236]'
                   }`}
                 >
                   {mins}m
@@ -156,16 +145,16 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
             </div>
           </div>
 
-          {/* Phase Link (Optional) */}
+          {/* Phase Link */}
           {phases.length > 0 && (
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                Assign to Phase (Optional)
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block mb-1">
+                Assign to phase (optional)
               </label>
               <select
                 value={phaseId}
                 onChange={(e) => setPhaseId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-200/80 dark:border-[#2E2A44] rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] rounded-lg text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-slate-400"
               >
                 {phases.map((p) => (
                   <option key={p.id} value={p.id} className="dark:bg-[#1C1929]">
@@ -181,16 +170,15 @@ export const AddTaskModal: React.FC<AddTaskModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 bg-slate-100 dark:bg-[#13111C] hover:bg-slate-200 dark:hover:bg-[#252236] text-slate-600 dark:text-slate-300 font-semibold rounded-2xl text-xs transition cursor-pointer"
+              className="flex-1 py-2 bg-slate-100 dark:bg-[#13111C] hover:bg-slate-200 dark:hover:bg-[#252236] text-slate-700 dark:text-slate-300 font-medium rounded-lg text-xs transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 bg-slate-900 dark:bg-[#2E2A44] hover:bg-slate-800 dark:hover:bg-[#3B3759] text-white font-bold rounded-2xl text-xs shadow-card transition flex items-center justify-center gap-1.5 cursor-pointer ring-1 ring-white/10"
+              className="flex-1 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-medium rounded-lg text-xs transition cursor-pointer border border-slate-700/20 dark:border-white/20"
             >
-              <PlusCircle className="w-4 h-4 text-amber-400" />
-              <span>Add to Plan</span>
+              Add task
             </button>
           </div>
         </form>

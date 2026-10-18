@@ -55,7 +55,7 @@ export interface Phase {
   nextVideo?: ActionMiniCard;
   upcomingLab?: ActionMiniCard;
   subtopics: SubTopic[];
-  unlockRequirement?: string;
+  prerequisite?: string;
 }
 
 export type ResourceType = 'cheatsheet' | 'lab' | 'doc' | 'video' | 'quiz' | 'flashcard';

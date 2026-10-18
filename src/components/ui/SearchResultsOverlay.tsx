@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Map, BookOpen, CheckSquare, X, ArrowRight } from 'lucide-react';
+import { Map, BookOpen, CheckSquare, X, ArrowRight } from 'lucide-react';
 import { Course, ResourceItem, Phase, AgendaTask } from '../../types/eduflow';
 
 interface SearchResultsOverlayProps {
@@ -23,18 +23,15 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
 
   const q = query.toLowerCase();
 
-  // Search phases
   const matchedPhases = course.phases.filter(
     p => p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.topicsCovered.some(t => t.toLowerCase().includes(q))
   );
 
-  // Search agenda tasks
-  const matchedTasks = course.agenda.filter(
+  const matchedTasks = (course.agenda || []).filter(
     t => t.title.toLowerCase().includes(q)
   );
 
-  // Search resources
-  const matchedResources = course.resources.filter(
+  const matchedResources = (course.resources || []).filter(
     r => r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q) || r.tags.some(t => t.toLowerCase().includes(q))
   );
 
@@ -48,32 +45,30 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
         aria-hidden="true" 
       />
       <div 
-        className="absolute right-4 lg:right-24 top-16 w-80 sm:w-96 z-40 rounded-2xl bg-[#141416] border border-white/[0.12] shadow-2xl overflow-hidden animate-scale-in"
+        className="absolute right-4 lg:right-24 top-16 w-80 sm:w-96 z-40 rounded-xl bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] shadow-lg overflow-hidden font-sans select-none"
         role="region"
-        aria-label="Search Results"
+        aria-label="Search results"
       >
-        <div className="p-3 bg-[#18181C] border-b border-white/[0.06] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-[#F5A623]" />
-            <span className="text-xs font-bold text-white">Search Results ({totalResults})</span>
-          </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white" aria-label="Close search results">
+        <div className="p-3 bg-slate-50 dark:bg-[#13111C] border-b border-slate-200 dark:border-[#2E2A44] flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-900 dark:text-white tabular-nums">
+            Search results ({totalResults})
+          </span>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1" aria-label="Close search results">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="max-h-80 overflow-y-auto divide-y divide-white/[0.04] p-1.5">
+        <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-[#2E2A44] p-1.5">
           {totalResults === 0 ? (
-            <div className="p-6 text-center text-xs text-zinc-500">
+            <div className="p-6 text-center text-xs text-slate-500">
               No results found for "{query}".
             </div>
           ) : (
             <>
-              {/* Matched Phases */}
               {matchedPhases.length > 0 && (
-                <div className="p-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block mb-1">
-                    Study Phases
+                <div className="p-2 space-y-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                    Phases
                   </span>
                   {matchedPhases.map(p => (
                     <button
@@ -82,25 +77,24 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
                         onSelectPhase(p);
                         onClose();
                       }}
-                      className="w-full text-left p-2 rounded-xl hover:bg-white/[0.04] flex items-center justify-between group"
+                      className="w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-[#252236] flex items-center justify-between group cursor-pointer"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Map className="w-3.5 h-3.5 text-[#2DD4BF] flex-shrink-0" />
-                        <span className="text-xs text-zinc-200 group-hover:text-white truncate">
+                        <Map className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <span className="text-xs text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white truncate">
                           Phase {p.phaseNumber}: {p.title}
                         </span>
                       </div>
-                      <ArrowRight className="w-3 h-3 text-zinc-500 group-hover:text-white flex-shrink-0" />
+                      <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Matched Agenda Tasks */}
               {matchedTasks.length > 0 && (
-                <div className="p-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block mb-1">
-                    Agenda Tasks
+                <div className="p-2 space-y-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                    Tasks
                   </span>
                   {matchedTasks.map(t => (
                     <button
@@ -109,25 +103,24 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
                         onSelectTask(t);
                         onClose();
                       }}
-                      className="w-full text-left p-2 rounded-xl hover:bg-white/[0.04] flex items-center justify-between group"
+                      className="w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-[#252236] flex items-center justify-between group cursor-pointer tabular-nums"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <CheckSquare className="w-3.5 h-3.5 text-[#F5A623] flex-shrink-0" />
-                        <span className="text-xs text-zinc-200 group-hover:text-white truncate">
+                        <CheckSquare className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <span className="text-xs text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white truncate">
                           {t.title}
                         </span>
                       </div>
-                      <span className="text-[10px] text-zinc-500 font-mono">{t.durationMinutes}m</span>
+                      <span className="text-[10px] text-slate-400">{t.durationMinutes}m</span>
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Matched Resources */}
               {matchedResources.length > 0 && (
-                <div className="p-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block mb-1">
-                    Library Resources
+                <div className="p-2 space-y-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                    Resources
                   </span>
                   {matchedResources.map(r => (
                     <button
@@ -136,15 +129,15 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
                         onSelectResource(r);
                         onClose();
                       }}
-                      className="w-full text-left p-2 rounded-xl hover:bg-white/[0.04] flex items-center justify-between group"
+                      className="w-full text-left p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-[#252236] flex items-center justify-between group cursor-pointer"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <BookOpen className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
-                        <span className="text-xs text-zinc-200 group-hover:text-white truncate">
+                        <BookOpen className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        <span className="text-xs text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white truncate">
                           {r.title}
                         </span>
                       </div>
-                      <span className="text-[10px] text-zinc-500">{r.category}</span>
+                      <span className="text-[10px] text-slate-400">{r.category}</span>
                     </button>
                   ))}
                 </div>
@@ -156,3 +149,5 @@ export const SearchResultsOverlay: React.FC<SearchResultsOverlayProps> = ({
     </>
   );
 };
+
+export default SearchResultsOverlay;
