@@ -79,7 +79,16 @@ export function loadCourses(): Course[] {
       return [];
     }
     const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    // Strip legacy synthetic nextVideo & upcomingLab suggestions from existing saved courses
+    return parsed.map((course: Course) => ({
+      ...course,
+      phases: (course.phases || []).map((phase) => {
+        const { nextVideo: _nv, upcomingLab: _ul, ...cleanPhase } = phase;
+        return cleanPhase as Phase;
+      }),
+    }));
   } catch {
     return [];
   }

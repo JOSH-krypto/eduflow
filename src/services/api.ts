@@ -237,6 +237,16 @@ class ApiService {
     }
   }
 
+  async deleteTask(taskId: string): Promise<void> {
+    try {
+      await this.request(`/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+    } catch {
+      // Local fallback handled
+    }
+  }
+
   // ================= SESSIONS =================
   async logSession(session: Omit<StudySessionLog, 'id'>): Promise<StudySessionLog> {
     try {

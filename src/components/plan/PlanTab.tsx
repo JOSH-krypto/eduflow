@@ -2,11 +2,10 @@ import React from 'react';
 import { 
   Check, 
   Lock, 
-  Video, 
-  Terminal, 
   ArrowRight, 
   Clock, 
-  Plus
+  Plus,
+  Play
 } from 'lucide-react';
 import { Course, Phase, SubTopic } from '../../types/eduflow';
 import { getPhaseDynamicDateRange } from '../../utils/dateUtils';
@@ -167,65 +166,6 @@ export const PlanTab: React.FC<PlanTabProps> = ({
                     </div>
                   </div>
 
-                  {/* Action Cards */}
-                  {(phase.nextVideo || phase.upcomingLab) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      {phase.nextVideo && (
-                        <div 
-                          onClick={() => onStartStudyTopic(phase.nextVideo!.title, phase)}
-                          className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] hover:border-slate-300 dark:hover:border-[#3B3759] transition-colors flex items-center justify-between gap-3 cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Watch: ${phase.nextVideo.title}`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-md bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
-                              <Video className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                                {phase.nextVideo.label || 'Next video'}
-                              </span>
-                              <h5 className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                {phase.nextVideo.title}
-                              </h5>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-slate-500 tabular-nums shrink-0">
-                            {phase.nextVideo.duration}
-                          </span>
-                        </div>
-                      )}
-
-                      {phase.upcomingLab && (
-                        <div 
-                          onClick={() => onStartStudyTopic(phase.upcomingLab!.title, phase)}
-                          className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#13111C] border border-slate-200 dark:border-[#2E2A44] hover:border-slate-300 dark:hover:border-[#3B3759] transition-colors flex items-center justify-between gap-3 cursor-pointer"
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Start lab: ${phase.upcomingLab.title}`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-md bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
-                              <Terminal className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                                {phase.upcomingLab.label || 'Upcoming lab'}
-                              </span>
-                              <h5 className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                {phase.upcomingLab.title}
-                              </h5>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-slate-500 tabular-nums shrink-0">
-                            {phase.upcomingLab.duration}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   {/* Subtopics Checklist */}
                   {phase.subtopics && phase.subtopics.length > 0 && (
                     <div className="pt-2">
@@ -236,7 +176,11 @@ export const PlanTab: React.FC<PlanTabProps> = ({
                         {phase.subtopics.map((sub) => (
                           <div 
                             key={sub.id} 
-                            className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#13111C] border border-slate-100 dark:border-[#2E2A44] rounded-lg text-xs"
+                            onClick={() => onStartStudyTopic(sub.title, phase, sub)}
+                            className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#13111C] hover:bg-slate-100 dark:hover:bg-[#252236] border border-slate-100 dark:border-[#2E2A44] rounded-lg text-xs cursor-pointer transition-colors"
+                            role="button"
+                            tabIndex={0}
+                            title={`Start session: ${sub.title}`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
                               <div className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${
@@ -248,9 +192,12 @@ export const PlanTab: React.FC<PlanTabProps> = ({
                                 {sub.title}
                               </span>
                             </div>
-                            <span className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums shrink-0 ml-2">
-                              {sub.durationMinutes}m
-                            </span>
+                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                              <span className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums">
+                                {sub.durationMinutes}m
+                              </span>
+                              <Play className="w-3 h-3 text-slate-400 hover:text-slate-900 dark:hover:text-white" />
+                            </div>
                           </div>
                         ))}
                       </div>

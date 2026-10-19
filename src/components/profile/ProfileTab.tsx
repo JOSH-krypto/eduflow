@@ -4,14 +4,14 @@ import {
   Mail,
   Clock,
   Award,
-  LogOut,
   Check,
   Save,
   Sun,
   Sunset,
   Moon,
   Coffee,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { UserProfile, UserPreferences, Course } from '../../types/eduflow';
 import { InitialsAvatar } from '../common/InitialsAvatar';
@@ -24,6 +24,7 @@ interface ProfileTabProps {
   profile: UserProfile;
   courses?: Course[];
   onUpdateProfile: (updated: UserProfile) => void;
+  onResetData?: () => void;
   onSignOut?: () => void;
   isBackendConnected?: boolean;
   themeMode?: ThemeMode;
@@ -34,6 +35,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   profile,
   courses = [],
   onUpdateProfile,
+  onResetData,
   onSignOut,
   isBackendConnected = false,
   themeMode: parentThemeMode,
@@ -48,6 +50,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const [currentThemeMode, setCurrentThemeMode] = useState<ThemeMode>(
     parentThemeMode || profile.preferences?.themeMode || getStoredThemeMode()
@@ -542,16 +545,46 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             )}
           </div>
 
-          {/* Sign Out */}
-          {onSignOut && (
-            <div>
-              <button
-                onClick={onSignOut}
-                className="w-full py-2.5 bg-slate-50 dark:bg-[#1C1929] hover:bg-slate-100 dark:hover:bg-[#252236] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#2E2A44] rounded-lg font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign out</span>
-              </button>
+          {/* Reset All Study Data */}
+          {(onResetData || onSignOut) && (
+            <div className="pt-2">
+              {showResetConfirm ? (
+                <div className="p-3.5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 space-y-2.5">
+                  <p className="text-xs text-rose-700 dark:text-rose-300 font-medium">
+                    Are you sure? This will reset all local courses, tasks, and study records.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setShowResetConfirm(false);
+                        if (onResetData) {
+                          onResetData();
+                        } else if (onSignOut) {
+                          onSignOut();
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                    >
+                      Yes, reset all data
+                    </button>
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      className="px-3 py-1.5 bg-white dark:bg-[#1C1929] border border-slate-200 dark:border-[#2E2A44] text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(true)}
+                  className="w-full py-2.5 bg-white dark:bg-[#1C1929] hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-[#2E2A44] hover:border-rose-200 dark:hover:border-rose-800 rounded-lg font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Reset all study data</span>
+                </button>
+              )}
             </div>
           )}
         </div>

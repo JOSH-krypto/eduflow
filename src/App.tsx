@@ -47,7 +47,6 @@ import { ResearchSummarizerModal } from './components/research/ResearchSummarize
 import { AcademicNewsModal } from './components/news/AcademicNewsModal';
 import { PhaseDetailModal } from './components/modals/PhaseDetailModal';
 import { CourseModal } from './components/modals/CourseModal';
-import { AuthModal } from './components/auth/AuthModal';
 import { Toast, ToastData } from './components/ui/Toast';
 
 export const App: React.FC = () => {
@@ -73,7 +72,6 @@ export const App: React.FC = () => {
   const [isAcademicNewsModalOpen, setIsAcademicNewsModalOpen] = useState<boolean>(false);
   const [academicNewsCategory, setAcademicNewsCategory] = useState<string>('All');
   const [isCourseModalOpen, setIsCourseModalOpen] = useState<boolean>(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [selectedPhaseForDetail, setSelectedPhaseForDetail] = useState<Phase | null>(null);
 
   const [focusSessionData, setFocusSessionData] = useState<{
@@ -391,6 +389,31 @@ export const App: React.FC = () => {
     }
   };
 
+  // Delete a task from agenda
+  const handleDeleteTask = async (taskId: string) => {
+    if (!activeCourse) return;
+
+    const updatedAgenda = activeCourse.agenda.filter((t) => t.id !== taskId);
+    const updatedPhases = recalculatePhaseProgress(activeCourse.phases, updatedAgenda);
+
+    const updatedCourse: Course = {
+      ...activeCourse,
+      agenda: updatedAgenda,
+      phases: updatedPhases,
+    };
+
+    setCourses(courses.map((c) => (c.id === activeCourse.id ? updatedCourse : c)));
+    triggerToast('Task deleted', 'Removed from study agenda.', 'info');
+
+    if (isBackendConnected) {
+      try {
+        await api.deleteTask(taskId);
+      } catch {
+        // Backend sync fallback handled gracefully
+      }
+    }
+  };
+
   // Save AI Research Summary
   const handleSaveSummary = (summary: ResearchSummary) => {
     const updated = addResearchSummary(summary);
@@ -404,8 +427,8 @@ export const App: React.FC = () => {
     triggerToast('Profile updated', 'Account preferences were saved.', 'success');
   };
 
-  // Sign out handler
-  const handleSignOut = async () => {
+  // Clear user data / reset handler (no login required)
+  const handleClearUserData = async () => {
     try {
       await api.logout();
     } catch {}
@@ -414,8 +437,7 @@ export const App: React.FC = () => {
     setCourses([]);
     setActiveCourseIdState('');
     setActiveTab('home');
-    setIsAuthModalOpen(true);
-    triggerToast('Signed out', 'Session ended successfully.', 'info');
+    triggerToast('Data reset', 'All study data was reset.', 'info');
   };
 
   // Notifications Handlers
@@ -485,6 +507,8 @@ export const App: React.FC = () => {
               userProfile={userProfile}
               onContinueSession={handleStartFocusSession}
               onToggleTask={handleToggleTask}
+              onAddTask={handleAddTask}
+              onDeleteTask={handleDeleteTask}
               onOpenAllTasks={() => setActiveTab('plan')}
               onOpenQuickActions={() => setIsQuickActionsOpen(true)}
               onOpenCreateCourse={() => setIsCourseModalOpen(true)}
@@ -518,7 +542,7 @@ export const App: React.FC = () => {
               profile={userProfile}
               courses={courses}
               onUpdateProfile={handleUpdateProfile}
-              onSignOut={handleSignOut}
+              onResetData={handleClearUserData}
               isBackendConnected={isBackendConnected}
               themeMode={themeMode}
               onThemeModeChange={handleThemeModeChange}
@@ -622,33 +646,6 @@ export const App: React.FC = () => {
           handleSelectCourse(newCourse.id);
           setIsCourseModalOpen(false);
           triggerToast('Course created', 'Course is now active.', 'success');
-        }}
-      />
-
-      {/* Auth / Sign In Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={(user) => {
-          setUserProfile(user);
-          if (user.preferences?.themeMode) {
-            setThemeModeState(user.preferences.themeMode);
-            setStoredThemeMode(user.preferences.themeMode);
-            applyTheme(user.preferences?.accentColor, user.preferences.themeMode);
-          }
-          setIsAuthModalOpen(false);
-          api.getCourses().then((serverCourses) => {
-            const list = serverCourses || [];
-            setCourses(list);
-            if (list.length > 0) {
-              setActiveCourseIdState(list[0].id);
-              setActiveCourseId(list[0].id);
-            } else {
-              setActiveCourseIdState('');
-              setActiveCourseId('');
-            }
-          });
-          triggerToast('Signed in', `Signed in as ${user.email}.`, 'success');
         }}
       />
     </div>

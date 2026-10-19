@@ -354,7 +354,7 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                   {userProfile.name || 'User'}
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate block">
-                  {userProfile.email || 'Free account'}
+                  Settings & preferences
                 </span>
               </div>
             </div>
