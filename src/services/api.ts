@@ -1,15 +1,15 @@
 import { Course, UserProfile, AgendaTask, StudySessionLog, ResearchSummary } from '../types/eduflow';
-import { 
-  loadCourses, 
-  saveCourses, 
-  loadUserProfile, 
-  saveUserProfile, 
+import {
+  loadCourses,
+  saveCourses,
+  loadUserProfile,
+  saveUserProfile,
   loadSessionLogs,
   saveSessionLogs
 } from './storage';
 
 const getBaseUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL;
+  const envUrl = (import.meta as any).env?.API_URL_PROD || (import.meta as any).env?.VITE_API_URL;
   if (envUrl) return envUrl;
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
@@ -17,7 +17,7 @@ const getBaseUrl = (): string => {
       return 'http://localhost:4000';
     }
   }
-  return 'https://eduflow-el1u.onrender.com';
+  return 'https://eduflow-gg3y.onrender.com';
 };
 
 const API_BASE_URL = getBaseUrl();
